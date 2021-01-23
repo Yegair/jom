@@ -32,7 +32,14 @@ object Branches {
                 }
             }
 
-            res!!.castError { _, error -> ParseResult.error(input, error) }
+            if (res == null) {
+                // there should be no code path to get here,
+                // because the parsers can not be empty if we get here
+                throw IllegalStateException("alt requires at least one embedded parser")
+            }
+
+            // this must be an error, so we can just return the result
+            res
         }
     }
 

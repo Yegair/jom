@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import kotlin.Pair;
+import kotlin.Unit;
 import org.junit.jupiter.api.Test;
 
 class CombinatorsTest {
@@ -170,9 +171,11 @@ class CombinatorsTest {
 
     @Test
     void not() {
-        final Parser<Void> parser = Combinators.not(TextParsers.alpha1());
+        final Parser<Unit> parser = Combinators.not(TextParsers.alpha1());
 
-        assertThatParseResult(parser.parse(Input.of("123"))).isOk(null).hasRemainingInput("123");
+        assertThatParseResult(parser.parse(Input.of("123")))
+                .isOk(Unit.INSTANCE)
+                .hasRemainingInput("123");
 
         assertThatParseResult(parser.parse(Input.of("abcd")))
                 .isError(ParseError.Not)

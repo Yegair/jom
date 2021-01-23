@@ -14,18 +14,6 @@ class SequencesTest {
                         TextParsers.tag("abc"), TextParsers.tag("|"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse(Input.of("abc|efg"))).isOk("|").hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("abc|efghij")))
-                .isOk("|")
-                .hasRemainingInput("hij");
-
-        assertThatParseResult(parser.parse(Input.of("")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("123")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("123");
     }
 
     @Test
@@ -36,18 +24,6 @@ class SequencesTest {
         assertThatParseResult(parser.parse(Input.of("abcefg")))
                 .isOk(new Pair<>("abc", "efg"))
                 .hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("abcefghij")))
-                .isOk(new Pair<>("abc", "efg"))
-                .hasRemainingInput("hij");
-
-        assertThatParseResult(parser.parse(Input.of("")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("123")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("123");
     }
 
     @Test
@@ -56,18 +32,6 @@ class SequencesTest {
                 Sequences.preceded(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse(Input.of("abcefg"))).isOk("efg").hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("abcefghij")))
-                .isOk("efg")
-                .hasRemainingInput("hij");
-
-        assertThatParseResult(parser.parse(Input.of("")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("123")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("123");
     }
 
     @Test
@@ -79,22 +43,6 @@ class SequencesTest {
         assertThatParseResult(parser.parse(Input.of("abc|efg")))
                 .isOk(new Pair<>("abc", "efg"))
                 .hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("abc|efghij")))
-                .isOk(new Pair<>("abc", "efg"))
-                .hasRemainingInput("hij");
-
-        assertThatParseResult(parser.parse(Input.of("abc|def")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("abc|def");
-
-        assertThatParseResult(parser.parse(Input.of("")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("123")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("123");
     }
 
     @Test
@@ -103,18 +51,6 @@ class SequencesTest {
                 Sequences.terminated(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse(Input.of("abcefg"))).isOk("abc").hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("abcefghij")))
-                .isOk("abc")
-                .hasRemainingInput("hij");
-
-        assertThatParseResult(parser.parse(Input.of("")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("");
-
-        assertThatParseResult(parser.parse(Input.of("123")))
-                .isError(ParseError.Tag)
-                .hasRemainingInput("123");
     }
 
     @Test

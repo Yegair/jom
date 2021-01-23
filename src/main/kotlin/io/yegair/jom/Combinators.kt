@@ -25,13 +25,14 @@ object Combinators {
     }
 
     /**
-     * Succeeds if all the input has been consumed by its child parser.
+     * Calls the parser if the condition is met.
      */
     @JvmStatic
-    fun <O> cond(condition: Boolean, parser: Parser<O>): Parser<O> {
+    fun <O> cond(condition: Boolean, parser: Parser<O>): Parser<O?> {
+        @Suppress("UNCHECKED_CAST")
         return when (condition) {
-            true -> parser
-            else -> Parser { input -> ParseResult.ok(input) }
+            true -> parser as Parser<O?>
+            else -> Parser { input -> ParseResult.ok(input, null) }
         }
     }
 
@@ -48,17 +49,18 @@ object Combinators {
     fun <O> consumed(parser: Parser<O>): Parser<Pair<O, ByteArray>> {
         return Parser { input ->
             val (tee, replica) = input.peek().tee()
-            val res = parser.parse(tee)
 
-            when {
-                res.ok -> res.mapOutput { remaining, output ->
-                    ParseResult.ok(
-                        remaining,
-                        Pair(output, replica.readByteArray())
-                    )
-                }
-                else -> res.castError { _, err -> ParseResult.error(input, err) }
-            }
+            parser
+                .parse(tee)
+                .map(
+                    ok = { remaining, output ->
+                        ParseResult.ok(
+                            remaining,
+                            Pair(output, replica.readByteArray())
+                        )
+                    },
+                    error = { _, err -> ParseResult.error(input, err) }
+                )
         }
     }
 
@@ -91,7 +93,10 @@ object Combinators {
                 val res = parser.parse(nextInput)
 
                 if (!res.ok) {
-                    return@Parser res.castError { _, error -> ParseResult.error(input, error) }
+                    return@Parser res.map(
+                        ok = { _, _ -> throw IllegalStateException("unexpected OK result") },
+                        error = { _, error -> ParseResult.error(input, error) }
+                    )
                 }
 
                 nextInput = res.remaining
@@ -141,7 +146,10 @@ object Combinators {
             var result: ParseResult<O> = parser.parse(nextInput)
 
             if (!result.ok) {
-                return@Parser result.castError { _, error -> ParseResult.error(input, error) }
+                return@Parser result.map(
+                    ok = { _, _ -> throw IllegalStateException("unexpected OK result") },
+                    error = { _, error -> ParseResult.error(input, error) }
+                )
             }
 
             nextInput = result.remaining
@@ -166,12 +174,10 @@ object Combinators {
     @JvmStatic
     fun <O, R> map(parser: Parser<O>, mapping: (O) -> R): Parser<R> {
         return Parser { input ->
-            parser.parse(input)
-                .mapOutput { remaining, output ->
-                    when (output) {
-                        null -> ParseResult.ok(remaining)
-                        else -> ParseResult.ok(remaining, mapping(output))
-                    }
+            parser
+                .parse(input)
+                .map { remaining, output ->
+                    ParseResult.ok(remaining, mapping(output))
                 }
         }
     }
@@ -180,15 +186,14 @@ object Combinators {
      * Succeeds if the child parser returns an error.
      */
     @JvmStatic
-    fun not(parser: Parser<*>): Parser<Void> {
+    fun not(parser: Parser<*>): Parser<Unit> {
         return Parser { input ->
-            parser.parse(input.peek())
-                .map { ok, remaining, _, _ ->
-                    when (ok) {
-                        true -> ParseResult.error(input, ParseError.Not)
-                        else -> ParseResult.ok(remaining)
-                    }
-                }
+            parser
+                .parse(input.peek())
+                .map(
+                    ok = { _, _ -> ParseResult.error(input, ParseError.Not) },
+                    error = { remaining, _ -> ParseResult.ok(remaining, Unit) }
+                )
         }
     }
 
@@ -196,10 +201,14 @@ object Combinators {
      * Optional parser: Will return OK without a result if not successful.
      */
     @JvmStatic
-    fun <O> opt(parser: Parser<O>): Parser<O> {
+    fun <O> opt(parser: Parser<O>): Parser<O?> {
         return Parser { input ->
-            parser.parse(input)
-                .mapError { remaining, _ -> ParseResult.ok(remaining) }
+            parser
+                .parse(input)
+                .map(
+                    ok = { remaining, output -> ParseResult.ok(remaining, output) },
+                    error = { remaining, _ -> ParseResult.ok(remaining, null) }
+                )
         }
     }
 
@@ -209,13 +218,12 @@ object Combinators {
     @JvmStatic
     fun <O> peek(parser: Parser<O>): Parser<O> {
         return Parser { input ->
-            parser.parse(input.peek())
-                .map { ok, _, output, error ->
-                    when {
-                        ok -> ParseResult.ok(input, output)
-                        else -> ParseResult.error(input, error!!)
-                    }
-                }
+            parser
+                .parse(input.peek())
+                .map(
+                    ok = { _, output -> ParseResult.ok(input, output) },
+                    error = { _, error -> ParseResult.error(input, error) }
+                )
         }
     }
 
@@ -226,12 +234,13 @@ object Combinators {
     fun recognize(parser: Parser<*>): Parser<ByteArray> {
         return Parser { input ->
             val (tee, replica) = input.peek().tee()
-            val res = parser.parse(tee)
 
-            when {
-                res.ok -> res.mapOutput { remaining, _ -> ParseResult.ok(remaining, replica.readByteArray()) }
-                else -> res.castError { _, err -> ParseResult.error(input, err) }
-            }
+            parser
+                .parse(tee)
+                .map(
+                    ok = { remaining, _ -> ParseResult.ok(remaining, replica.readByteArray()) },
+                    error = { _, err -> ParseResult.error(input, err) }
+                )
         }
     }
 
@@ -248,7 +257,7 @@ object Combinators {
      * It can be used for example as the last alternative in alt to specify the default case.
      */
     @JvmStatic
-    fun <O> success(output: O?): Parser<O> {
+    fun <O> success(output: O): Parser<O> {
         return Parser { input -> ParseResult.ok(input, output) }
     }
 
@@ -256,11 +265,11 @@ object Combinators {
      * Returns the provided value if the child parser succeeds.
      */
     @JvmStatic
-    fun <O> value(output: O?, parser: Parser<*>): Parser<O> {
+    fun <O> value(output: O, parser: Parser<*>): Parser<O> {
         return Parser { input ->
             parser
                 .parse(input)
-                .mapOutput { remaining, _ -> ParseResult.ok(remaining, output) }
+                .map { remaining, _ -> ParseResult.ok(remaining, output) }
         }
     }
 
@@ -272,7 +281,7 @@ object Combinators {
         return Parser { input ->
             parser
                 .parse(input.peek())
-                .mapOutput { remaining, output ->
+                .map { remaining, output ->
                     when {
                         predicate(output) -> ParseResult.ok(remaining, output)
                         else -> ParseResult.error(input, ParseError.Verify)
