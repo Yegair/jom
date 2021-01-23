@@ -48,6 +48,17 @@ internal fun Utf8CodePoint.utf8(): String {
 object Utf8CodePoints {
 
     @JvmStatic
+    @JvmName("sizeOf")
+    fun Utf8CodePoint.utf8Size(): Int {
+        return when {
+            this and 0xFF000000.toInt() != 0 -> 4
+            this and 0x00FF0000 != 0 -> 3
+            this and 0x0000FF00 != 0 -> 2
+            else -> 1
+        }
+    }
+
+    @JvmStatic
     fun Utf8CodePoint?.equalsIgnoreCase(other: Utf8CodePoint?): Boolean {
         return when {
             this == other -> true

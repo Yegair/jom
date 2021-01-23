@@ -125,7 +125,7 @@ class ParseResultAssert<O> private constructor(
      *
      * NOTE: This operation fully consumes the [ParseResult.remaining] input.
      */
-    fun hasRemainingInput(expected: ByteArray?): ParseResultAssert<O> {
+    fun hasRemainingInput(expected: ByteArray): ParseResultAssert<O> {
         isNotNull
 
         val remainingInput = actual
@@ -136,7 +136,7 @@ class ParseResultAssert<O> private constructor(
             throw AssertionError(
                 """
                 remaining input does not match
-                expected: <${Arrays.toString(expected)}> but was: <${Arrays.toString(remainingInput)}>
+                expected: <${expected.contentToString()}> but was: <${remainingInput.contentToString()}>
                 """.trimIndent()
             )
         }

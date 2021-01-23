@@ -6,25 +6,25 @@ import okio.ByteString
 import okio.ByteString.Companion.EMPTY
 import okio.ByteString.Companion.encodeUtf8
 import okio.EOFException
-import okio.buffer
 
 /**
  * A sequential source of symbols/elements that can be parsed.
  */
-class Input private constructor(private val source: BufferedSource) {
+class Input private constructor(
+    private val source: CountingBufferedSource
+) {
 
     /**
      * Returns a new Input that can read symbols from this Input without consuming them.
      */
     fun peek(): Input = Input(source.peek())
 
-    fun tee(): Pair<Input, Input> {
-        return Buffer().let { buffer ->
-            Pair(Input(ReplicatingSource(source, buffer).buffer()), Input(buffer))
-        }
+    fun skip(byteCount: Long) {
+        source.skip(byteCount)
     }
 
-    fun skip(byteCount: Long) = source.skip(byteCount)
+    val bytesProcessed: Long
+        get() = source.bytesProcessed
 
     /**
      * Indicates whether the end of this input has been reached (aka. EOF).
@@ -33,12 +33,6 @@ class Input private constructor(private val source: BufferedSource) {
 
     fun readByteString(byteCount: Long): ByteString = try {
         source.readByteString(byteCount)
-    } catch (e: EOFException) {
-        EMPTY
-    }
-
-    fun readByteString(): ByteString = try {
-        source.readByteString()
     } catch (e: EOFException) {
         EMPTY
     }
@@ -76,7 +70,7 @@ class Input private constructor(private val source: BufferedSource) {
 
         @JvmStatic
         fun of(source: BufferedSource): Input {
-            return Input(source)
+            return Input(CountingBufferedSource(source))
         }
 
         @JvmStatic

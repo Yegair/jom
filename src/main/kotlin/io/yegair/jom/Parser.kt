@@ -7,6 +7,12 @@ fun interface Parser<O> {
      */
     fun parse(input: Input): ParseResult<O>
 
+    /**
+     * Parses the given string and produces a parse result.
+     */
+    @JvmDefault
+    fun parse(input: String): ParseResult<O> = parse(Input.of(input))
+
     companion object {
 
         /**

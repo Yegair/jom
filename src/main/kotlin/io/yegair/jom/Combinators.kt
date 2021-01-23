@@ -14,13 +14,14 @@ object Combinators {
     @JvmStatic
     fun <O> allConsuming(parser: Parser<O>): Parser<O> {
         return Parser { input ->
-            val res = parser.parse(input.peek())
-
-            when {
-                res.isError() -> res
-                res.ok && res.remaining.exhausted() -> res
-                else -> ParseResult.error(input, ParseError.Eof)
-            }
+            parser
+                .parse(input.peek())
+                .map { remaining, output ->
+                    when {
+                        remaining.exhausted() -> ParseResult.ok(remaining, output)
+                        else -> ParseResult.error(input, ParseError.Eof)
+                    }
+                }
         }
     }
 
@@ -48,19 +49,17 @@ object Combinators {
     @JvmStatic
     fun <O> consumed(parser: Parser<O>): Parser<Pair<O, ByteArray>> {
         return Parser { input ->
-            val (tee, replica) = input.peek().tee()
-
             parser
-                .parse(tee)
-                .map(
-                    ok = { remaining, output ->
-                        ParseResult.ok(
-                            remaining,
-                            Pair(output, replica.readByteArray())
-                        )
-                    },
-                    error = { _, err -> ParseResult.error(input, err) }
-                )
+                .parse(input.peek())
+                .map { remaining, output ->
+                    val consumedLen = remaining.bytesProcessed - input.bytesProcessed
+                    val consumed = input.peek().readByteString(consumedLen)
+
+                    ParseResult.ok(
+                        remaining,
+                        Pair(output, consumed.toByteArray())
+                    )
+                }
         }
     }
 
@@ -112,22 +111,33 @@ object Combinators {
      */
     @JvmStatic
     fun <O> many0(parser: Parser<O>): Parser<List<O>> {
-        return Parser { input ->
-            var nextInput = input.peek()
-            var result: ParseResult<O>
+        return Parser { originalInput ->
+            var input = originalInput.peek()
             val output: MutableList<O> = LinkedList()
 
-            while (parser.parse(nextInput).also { result = it }.ok) {
-                nextInput = result.remaining
-                val nextOutput = result.output
+            while (true) {
+                val res = parser.parse(input.peek())
 
-                if (nextOutput != null) {
-                    output.add(nextOutput)
+                if (!res.ok) {
+                    return@Parser ParseResult.ok(input, output)
                 }
+
+                if (input.bytesProcessed == res.remaining.bytesProcessed) {
+                    // detected non terminating parser
+                    return@Parser ParseResult.error(originalInput, ParseError.Many)
+                }
+
+                input = res.remaining
+                output.add(res.output)
             }
 
-            ParseResult.ok(result.remaining, output)
+            @Suppress("UNREACHABLE_CODE")
+            unreachable()
         }
+    }
+
+    private fun unreachable(): Nothing {
+        throw IllegalStateException("unreachable code")
     }
 
     /**
@@ -142,8 +152,7 @@ object Combinators {
         return Parser { input ->
             val output: MutableList<O> = LinkedList()
 
-            var nextInput = input.peek()
-            var result: ParseResult<O> = parser.parse(nextInput)
+            var result: ParseResult<O> = parser.parse(input.peek())
 
             if (!result.ok) {
                 return@Parser result.map(
@@ -152,19 +161,31 @@ object Combinators {
                 )
             }
 
-            nextInput = result.remaining
-            result.output?.run(output::add)
-
-            while (parser.parse(nextInput).also { result = it }.ok) {
-                nextInput = result.remaining
-                val nextOutput = result.output
-
-                if (nextOutput != null) {
-                    output.add(nextOutput)
-                }
+            if (input.bytesProcessed == result.remaining.bytesProcessed) {
+                // parser accepts empty input, many1 would run forever with this parser
+                return@Parser ParseResult.error(input, ParseError.Many)
             }
 
-            ParseResult.ok(result.remaining, output)
+            output.add(result.output)
+
+            while (true) {
+                val res = parser.parse(result.remaining.peek())
+
+                if (!res.ok) {
+                    return@Parser ParseResult.ok(result.remaining, output)
+                }
+
+                if (result.remaining.bytesProcessed == res.remaining.bytesProcessed) {
+                    // detected non terminating parser
+                    return@Parser ParseResult.error(input, ParseError.Many)
+                }
+
+                result = res
+                output.add(res.output)
+            }
+
+            @Suppress("UNREACHABLE_CODE")
+            unreachable()
         }
     }
 
@@ -233,14 +254,17 @@ object Combinators {
     @JvmStatic
     fun recognize(parser: Parser<*>): Parser<ByteArray> {
         return Parser { input ->
-            val (tee, replica) = input.peek().tee()
-
             parser
-                .parse(tee)
-                .map(
-                    ok = { remaining, _ -> ParseResult.ok(remaining, replica.readByteArray()) },
-                    error = { _, err -> ParseResult.error(input, err) }
-                )
+                .parse(input.peek())
+                .map { remaining, _ ->
+                    val consumedLen = remaining.bytesProcessed - input.bytesProcessed
+                    val consumed = input.peek().readByteString(consumedLen)
+
+                    ParseResult.ok(
+                        remaining,
+                        consumed.toByteArray()
+                    )
+                }
         }
     }
 
@@ -277,7 +301,7 @@ object Combinators {
      * Returns the provided value if the child parser succeeds.
      */
     @JvmStatic
-    fun <O> verify(parser: Parser<O>, predicate: (O?) -> Boolean): Parser<O> {
+    fun <O> verify(parser: Parser<O>, predicate: (O) -> Boolean): Parser<O> {
         return Parser { input ->
             parser
                 .parse(input.peek())
