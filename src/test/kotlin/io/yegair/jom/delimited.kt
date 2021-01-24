@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.Sequences.delimited
+import io.yegair.jom.Combinators.delimited
 import io.yegair.jom.TextParsers.alpha0
 import io.yegair.jom.TextParsers.digit0
 import io.yegair.jom.TextParsers.digit1

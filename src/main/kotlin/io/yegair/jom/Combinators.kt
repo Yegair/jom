@@ -141,6 +141,20 @@ object Combinators {
     }
 
     /**
+     * Matches a result from the first parser,
+     * then gets a result from the separator parser,
+     * then matches another result from the second parser.
+     */
+    @JvmStatic
+    fun <O> delimited(
+        left: Parser<*>,
+        middle: Parser<O>,
+        right: Parser<*>
+    ): Parser<O> {
+        return map(triple(left, middle, right), Triple<*, O, *>::second)
+    }
+
+    /**
      * Repeats the embedded parser until it fails and returns the results in a [List].
      */
     @JvmStatic
@@ -268,6 +282,28 @@ object Combinators {
     }
 
     /**
+     * Gets a result from the first parser,
+     * then gets another result from the second parser.
+     */
+    @JvmStatic
+    fun <O1, O2> pair(
+        first: Parser<O1>,
+        second: Parser<O2>
+    ): Parser<Pair<O1, O2>> {
+        return Parser.peeking { input: Input ->
+            first
+                .parse(input)
+                .map { remaining1, output1 ->
+                    second
+                        .parse(remaining1)
+                        .map { remaining2, output2 ->
+                            ParseResult.ok(remaining2, Pair(output1, output2))
+                        }
+                }
+        }
+    }
+
+    /**
      * Tries to apply its parser without consuming the input.
      */
     @JvmStatic
@@ -288,8 +324,8 @@ object Combinators {
         parser2: Parser<O2>
     ): Parser<Pair<O1, O2>> {
         return alt(
-            Sequences.pair(parser1, parser2),
-            map(Sequences.pair(parser2, parser1)) { (o2, o1) -> Pair(o1, o2) }
+            pair(parser1, parser2),
+            map(pair(parser2, parser1)) { (o2, o1) -> Pair(o1, o2) }
         )
     }
 
@@ -300,13 +336,25 @@ object Combinators {
         parser3: Parser<O3>
     ): Parser<Triple<O1, O2, O3>> {
         return alt(
-            Sequences.triple(parser1, parser2, parser3),
-            map(Sequences.triple(parser1, parser3, parser2)) { (o1, o3, o2) -> Triple(o1, o2, o3) },
-            map(Sequences.triple(parser2, parser1, parser3)) { (o2, o1, o3) -> Triple(o1, o2, o3) },
-            map(Sequences.triple(parser2, parser3, parser1)) { (o2, o3, o1) -> Triple(o1, o2, o3) },
-            map(Sequences.triple(parser3, parser1, parser2)) { (o3, o1, o2) -> Triple(o1, o2, o3) },
-            map(Sequences.triple(parser3, parser2, parser1)) { (o3, o2, o1) -> Triple(o1, o2, o3) }
+            triple(parser1, parser2, parser3),
+            map(triple(parser1, parser3, parser2)) { (o1, o3, o2) -> Triple(o1, o2, o3) },
+            map(triple(parser2, parser1, parser3)) { (o2, o1, o3) -> Triple(o1, o2, o3) },
+            map(triple(parser2, parser3, parser1)) { (o2, o3, o1) -> Triple(o1, o2, o3) },
+            map(triple(parser3, parser1, parser2)) { (o3, o1, o2) -> Triple(o1, o2, o3) },
+            map(triple(parser3, parser2, parser1)) { (o3, o2, o1) -> Triple(o1, o2, o3) }
         )
+    }
+
+    /**
+     * Matches a result from the first parser and discards it,
+     * then gets a result from the second parser.
+     */
+    @JvmStatic
+    fun <O> preceded(
+        first: Parser<*>,
+        second: Parser<O>
+    ): Parser<O> {
+        return map(pair(first, second), Pair<*, O>::second)
     }
 
     /**
@@ -338,12 +386,52 @@ object Combinators {
     }
 
     /**
+     * Gets a result from the first parser,
+     * then matches a result from the sep_parser and discards it,
+     * then gets another result from the second parser.
+     */
+    @JvmStatic
+    fun <O1, O2> separatedPair(
+        first: Parser<O1>,
+        separator: Parser<*>,
+        second: Parser<O2>
+    ): Parser<Pair<O1, O2>> {
+        return map(triple(first, separator, second)) { (result1, _, result2) -> Pair(result1, result2) }
+    }
+
+    /**
      * A parser which always succeeds with given value without consuming any input.
      * It can be used for example as the last alternative in alt to specify the default case.
      */
     @JvmStatic
     fun <O> success(output: O): Parser<O> {
         return Parser { input -> ParseResult.ok(input, output) }
+    }
+
+    /**
+     * Gets a result from the first parser,
+     * then matches a result from the second parser and discards it.
+     */
+    @JvmStatic
+    fun <O> terminated(
+        first: Parser<O>,
+        second: Parser<*>
+    ): Parser<O> {
+        return map(pair(first, second), Pair<O, *>::first)
+    }
+
+    /**
+     * Applies three parsers one by one and returns their results as a [Triple].
+     */
+    @JvmStatic
+    fun <O1, O2, O3> triple(
+        first: Parser<O1>,
+        second: Parser<O2>,
+        third: Parser<O3>
+    ): Parser<Triple<O1, O2, O3>> {
+        return map(pair(pair(first, second), third)) {
+            Triple(it.first.first, it.first.second, it.second)
+        }
     }
 
     /**

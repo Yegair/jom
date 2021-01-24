@@ -3,7 +3,7 @@
 package io.yegair.jom
 
 import io.yegair.jom.Combinators.recognize
-import io.yegair.jom.Sequences.separatedPair
+import io.yegair.jom.Combinators.separatedPair
 import io.yegair.jom.TextParsers.alpha0
 import io.yegair.jom.TextParsers.alpha1
 import io.yegair.jom.TextParsers.chr

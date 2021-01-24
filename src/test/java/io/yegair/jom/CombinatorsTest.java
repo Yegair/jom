@@ -33,7 +33,7 @@ class CombinatorsTest {
                 Combinators.consumed(
                         Combinators.value(
                                 true,
-                                Sequences.separatedPair(
+                                Combinators.separatedPair(
                                         TextParsers.alpha1(),
                                         TextParsers.chr(','),
                                         TextParsers.alpha1())),
@@ -109,7 +109,7 @@ class CombinatorsTest {
     void recognize() {
         final Parser<String> parser =
                 Combinators.recognize(
-                        Sequences.separatedPair(
+                        Combinators.separatedPair(
                                 TextParsers.alpha1(), TextParsers.chr(','), TextParsers.alpha1()),
                         StandardCharsets.UTF_8);
 

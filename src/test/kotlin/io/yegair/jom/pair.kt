@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.Sequences.pair
+import io.yegair.jom.Combinators.pair
 import io.yegair.jom.TextParsers.alpha0
 import io.yegair.jom.TextParsers.alpha1
 import io.yegair.jom.TextParsers.chr

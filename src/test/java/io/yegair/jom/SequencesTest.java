@@ -10,7 +10,7 @@ class SequencesTest {
     @Test
     void delimited() {
         final Parser<String> parser =
-                Sequences.delimited(
+                Combinators.delimited(
                         TextParsers.tag("abc"), TextParsers.tag("|"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abc|efg")).isOk("|").hasRemainingInput("");
@@ -19,7 +19,7 @@ class SequencesTest {
     @Test
     void pair() {
         final Parser<Pair<String, String>> parser =
-                Sequences.pair(TextParsers.tag("abc"), TextParsers.tag("efg"));
+                Combinators.pair(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abcefg"))
                 .isOk(new Pair<>("abc", "efg"))
@@ -29,7 +29,7 @@ class SequencesTest {
     @Test
     void preceded() {
         final Parser<String> parser =
-                Sequences.preceded(TextParsers.tag("abc"), TextParsers.tag("efg"));
+                Combinators.preceded(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abcefg")).isOk("efg").hasRemainingInput("");
     }
@@ -37,7 +37,7 @@ class SequencesTest {
     @Test
     void separatedPair() {
         final Parser<Pair<String, String>> parser =
-                Sequences.separatedPair(
+                Combinators.separatedPair(
                         TextParsers.tag("abc"), TextParsers.tag("|"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abc|efg"))
@@ -48,7 +48,7 @@ class SequencesTest {
     @Test
     void terminated() {
         final Parser<String> parser =
-                Sequences.terminated(TextParsers.tag("abc"), TextParsers.tag("efg"));
+                Combinators.terminated(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abcefg")).isOk("abc").hasRemainingInput("");
     }
@@ -56,7 +56,8 @@ class SequencesTest {
     @Test
     void triple() {
         final Parser<Triple<String, String, String>> parser =
-                Sequences.triple(TextParsers.alpha1(), TextParsers.digit1(), TextParsers.alpha1());
+                Combinators.triple(
+                        TextParsers.alpha1(), TextParsers.digit1(), TextParsers.alpha1());
 
         assertThatParseResult(parser.parse("abc123def"))
                 .isOk(new Triple<>("abc", "123", "def"))

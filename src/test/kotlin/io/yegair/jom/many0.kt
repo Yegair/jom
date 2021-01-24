@@ -3,7 +3,7 @@
 package io.yegair.jom
 
 import io.yegair.jom.Combinators.many0
-import io.yegair.jom.Sequences.pair
+import io.yegair.jom.Combinators.pair
 import io.yegair.jom.TextParsers.alpha0
 import io.yegair.jom.TextParsers.digit0
 import io.yegair.jom.TextParsers.tag
