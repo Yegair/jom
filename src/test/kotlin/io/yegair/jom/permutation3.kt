@@ -17,7 +17,7 @@ class permutation3 {
     fun `should parse valid input in parser order`() {
         val parser = permutation3(alpha1(), digit1(), chr('c'))
 
-        assertThatParseResult(parser.parse(Input.of("ab123cd")))
+        assertThatParseResult(parser.parse("ab123cd"))
             .isOk(Triple("ab", "123", 'c'))
             .hasRemainingInput("d")
     }
@@ -26,7 +26,7 @@ class permutation3 {
     fun `should parse valid input in non parser order`() {
         val parser = permutation3(alpha1(), digit1(), chr('c'))
 
-        assertThatParseResult(parser.parse(Input.of("c123abcd")))
+        assertThatParseResult(parser.parse("c123abcd"))
             .isOk(Triple("abcd", "123", 'c'))
             .hasRemainingInput("")
     }
@@ -35,7 +35,7 @@ class permutation3 {
     fun `should fail if first parser fails`() {
         val parser = permutation3(alpha1(), digit1(), chr('c'))
 
-        assertThatParseResult(parser.parse(Input.of(";123")))
+        assertThatParseResult(parser.parse(";123"))
             .isError
             .hasRemainingInput(";123")
     }
@@ -44,7 +44,7 @@ class permutation3 {
     fun `should fail if second parser fails`() {
         val parser = permutation3(alpha1(), digit1(), chr('c'))
 
-        assertThatParseResult(parser.parse(Input.of("abc")))
+        assertThatParseResult(parser.parse("abc"))
             .isError
             .hasRemainingInput("abc")
     }
@@ -53,7 +53,7 @@ class permutation3 {
     fun `should accept empty input`() {
         val parser = permutation3(alpha0(), digit0(), alpha0())
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk(Triple("", "", ""))
             .hasRemainingInput("")
     }

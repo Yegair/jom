@@ -16,7 +16,7 @@ class permutation2 {
     fun `should parse valid input in parser order`() {
         val parser = permutation2(alpha1(), digit1())
 
-        assertThatParseResult(parser.parse(Input.of("ab123")))
+        assertThatParseResult(parser.parse("ab123"))
             .isOk(Pair("ab", "123"))
             .hasRemainingInput("")
     }
@@ -25,7 +25,7 @@ class permutation2 {
     fun `should parse valid input in non parser order`() {
         val parser = permutation2(alpha1(), digit1())
 
-        assertThatParseResult(parser.parse(Input.of("123ac")))
+        assertThatParseResult(parser.parse("123ac"))
             .isOk(Pair("ac", "123"))
             .hasRemainingInput("")
     }
@@ -34,7 +34,7 @@ class permutation2 {
     fun `should fail if first parser fails`() {
         val parser = permutation2(alpha1(), digit1())
 
-        assertThatParseResult(parser.parse(Input.of(";123")))
+        assertThatParseResult(parser.parse(";123"))
             .isError
             .hasRemainingInput(";123")
     }
@@ -43,7 +43,7 @@ class permutation2 {
     fun `should fail if second parser fails`() {
         val parser = permutation2(alpha1(), digit1())
 
-        assertThatParseResult(parser.parse(Input.of("abc;")))
+        assertThatParseResult(parser.parse("abc;"))
             .isError
             .hasRemainingInput("abc;")
     }
@@ -52,7 +52,7 @@ class permutation2 {
     fun `should accept empty input`() {
         val parser = permutation2(alpha0(), digit0())
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk(Pair("", ""))
             .hasRemainingInput("")
     }
