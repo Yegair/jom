@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.TextParsers.notLineEnding
+import io.yegair.jom.Parsers.notLineEnding
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 

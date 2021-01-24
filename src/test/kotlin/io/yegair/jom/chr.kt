@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.TextParsers.chr
+import io.yegair.jom.Parsers.chr
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 

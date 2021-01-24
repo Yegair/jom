@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.TextParsers.multiSpace1
+import io.yegair.jom.Parsers.multiSpace1
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 

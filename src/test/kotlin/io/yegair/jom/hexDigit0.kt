@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.TextParsers.hexDigit0
+import io.yegair.jom.Parsers.hexDigit0
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 

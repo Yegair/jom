@@ -5,11 +5,11 @@ package io.yegair.jom
 import io.yegair.jom.Combinators.consumed
 import io.yegair.jom.Combinators.separatedPair
 import io.yegair.jom.Combinators.value
-import io.yegair.jom.TextParsers.alpha0
-import io.yegair.jom.TextParsers.alpha1
-import io.yegair.jom.TextParsers.chr
-import io.yegair.jom.TextParsers.tag
-import io.yegair.jom.TextParsers.tagNoCase
+import io.yegair.jom.Parsers.alpha0
+import io.yegair.jom.Parsers.alpha1
+import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.tag
+import io.yegair.jom.Parsers.tagNoCase
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets

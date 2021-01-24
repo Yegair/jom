@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.TextParsers.noneOf
+import io.yegair.jom.Parsers.noneOf
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 

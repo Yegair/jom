@@ -3,12 +3,12 @@
 package io.yegair.jom
 
 import io.yegair.jom.Combinators.terminated
-import io.yegair.jom.TextParsers.alpha0
-import io.yegair.jom.TextParsers.alpha1
-import io.yegair.jom.TextParsers.chr
-import io.yegair.jom.TextParsers.digit0
-import io.yegair.jom.TextParsers.digit1
-import io.yegair.jom.TextParsers.tag
+import io.yegair.jom.Parsers.alpha0
+import io.yegair.jom.Parsers.alpha1
+import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.digit0
+import io.yegair.jom.Parsers.digit1
+import io.yegair.jom.Parsers.tag
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 

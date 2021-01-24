@@ -12,15 +12,15 @@ import org.junit.jupiter.api.Test;
 class CombinatorsTest {
     @Test
     void allConsuming() {
-        final Parser<String> parser = Combinators.allConsuming(TextParsers.alpha1());
+        final Parser<String> parser = Combinators.allConsuming(Parsers.alpha1());
 
         assertThatParseResult(parser.parse("abcd")).isOk("abcd").hasRemainingInput("");
     }
 
     @Test
     void cond() {
-        final Parser<String> enabled = Combinators.cond(true, TextParsers.alpha1());
-        final Parser<String> disabled = Combinators.cond(false, TextParsers.alpha1());
+        final Parser<String> enabled = Combinators.cond(true, Parsers.alpha1());
+        final Parser<String> disabled = Combinators.cond(false, Parsers.alpha1());
 
         assertThatParseResult(enabled.parse("abcd;")).isOk("abcd").hasRemainingInput(";");
 
@@ -34,9 +34,7 @@ class CombinatorsTest {
                         Combinators.value(
                                 true,
                                 Combinators.separatedPair(
-                                        TextParsers.alpha1(),
-                                        TextParsers.chr(','),
-                                        TextParsers.alpha1())),
+                                        Parsers.alpha1(), Parsers.chr(','), Parsers.alpha1())),
                         StandardCharsets.UTF_8);
 
         assertThatParseResult(parser.parse("abcd,efgh1"))
@@ -46,7 +44,7 @@ class CombinatorsTest {
 
     @Test
     void count() {
-        final Parser<List<String>> parser = Combinators.count(TextParsers.tag("abc"), 2);
+        final Parser<List<String>> parser = Combinators.count(Parsers.tag("abc"), 2);
 
         assertThatParseResult(parser.parse("abcabc"))
                 .isOk(Arrays.asList("abc", "abc"))
@@ -55,7 +53,7 @@ class CombinatorsTest {
 
     @Test
     void many0() {
-        final Parser<List<String>> parser = Combinators.many0(TextParsers.tag("abc"));
+        final Parser<List<String>> parser = Combinators.many0(Parsers.tag("abc"));
 
         assertThatParseResult(parser.parse("abcabc"))
                 .isOk(Arrays.asList("abc", "abc"))
@@ -64,7 +62,7 @@ class CombinatorsTest {
 
     @Test
     void many1() {
-        final Parser<List<String>> parser = Combinators.many1(TextParsers.tag("abc"));
+        final Parser<List<String>> parser = Combinators.many1(Parsers.tag("abc"));
 
         assertThatParseResult(parser.parse("abcabc"))
                 .isOk(Arrays.asList("abc", "abc"))
@@ -73,14 +71,14 @@ class CombinatorsTest {
 
     @Test
     void map() {
-        final Parser<Integer> parser = Combinators.map(TextParsers.digit1(), String::length);
+        final Parser<Integer> parser = Combinators.map(Parsers.digit1(), String::length);
 
         assertThatParseResult(parser.parse("123456")).isOk(6).hasRemainingInput("");
     }
 
     @Test
     void not() {
-        final Parser<Unit> parser = Combinators.not(TextParsers.alpha1());
+        final Parser<Unit> parser = Combinators.not(Parsers.alpha1());
 
         assertThatParseResult(parser.parse("123")).isOk(Unit.INSTANCE).hasRemainingInput("123");
 
@@ -91,7 +89,7 @@ class CombinatorsTest {
 
     @Test
     void opt() {
-        final Parser<String> parser = Combinators.opt(TextParsers.alpha1());
+        final Parser<String> parser = Combinators.opt(Parsers.alpha1());
 
         assertThatParseResult(parser.parse("abcd;")).isOk("abcd").hasRemainingInput(";");
 
@@ -100,7 +98,7 @@ class CombinatorsTest {
 
     @Test
     void peek() {
-        final Parser<String> parser = Combinators.peek(TextParsers.alpha1());
+        final Parser<String> parser = Combinators.peek(Parsers.alpha1());
 
         assertThatParseResult(parser.parse("abcd;")).isOk("abcd").hasRemainingInput("abcd;");
     }
@@ -110,7 +108,7 @@ class CombinatorsTest {
         final Parser<String> parser =
                 Combinators.recognize(
                         Combinators.separatedPair(
-                                TextParsers.alpha1(), TextParsers.chr(','), TextParsers.alpha1()),
+                                Parsers.alpha1(), Parsers.chr(','), Parsers.alpha1()),
                         StandardCharsets.UTF_8);
 
         assertThatParseResult(parser.parse("abcd,efgh")).isOk("abcd,efgh").hasRemainingInput("");
@@ -129,7 +127,7 @@ class CombinatorsTest {
 
     @Test
     void value() {
-        final Parser<Integer> parser = Combinators.value(1234, TextParsers.alpha1());
+        final Parser<Integer> parser = Combinators.value(1234, Parsers.alpha1());
 
         assertThatParseResult(parser.parse("abcd")).isOk(1234).hasRemainingInput("");
     }
@@ -137,7 +135,7 @@ class CombinatorsTest {
     @Test
     void verify() {
         final Parser<String> parser =
-                Combinators.verify(TextParsers.alpha1(), output -> output.length() == 4);
+                Combinators.verify(Parsers.alpha1(), output -> output.length() == 4);
 
         assertThatParseResult(parser.parse("abcd")).isOk("abcd").hasRemainingInput("");
 

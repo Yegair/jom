@@ -4,7 +4,7 @@ import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.utf8Size
 
-object TextParsers {
+object Parsers {
 
     @JvmStatic
     fun alpha0(): Parser<String> {

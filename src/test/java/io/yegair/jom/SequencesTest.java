@@ -10,8 +10,7 @@ class SequencesTest {
     @Test
     void delimited() {
         final Parser<String> parser =
-                Combinators.delimited(
-                        TextParsers.tag("abc"), TextParsers.tag("|"), TextParsers.tag("efg"));
+                Combinators.delimited(Parsers.tag("abc"), Parsers.tag("|"), Parsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abc|efg")).isOk("|").hasRemainingInput("");
     }
@@ -19,7 +18,7 @@ class SequencesTest {
     @Test
     void pair() {
         final Parser<Pair<String, String>> parser =
-                Combinators.pair(TextParsers.tag("abc"), TextParsers.tag("efg"));
+                Combinators.pair(Parsers.tag("abc"), Parsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abcefg"))
                 .isOk(new Pair<>("abc", "efg"))
@@ -28,8 +27,7 @@ class SequencesTest {
 
     @Test
     void preceded() {
-        final Parser<String> parser =
-                Combinators.preceded(TextParsers.tag("abc"), TextParsers.tag("efg"));
+        final Parser<String> parser = Combinators.preceded(Parsers.tag("abc"), Parsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abcefg")).isOk("efg").hasRemainingInput("");
     }
@@ -37,8 +35,7 @@ class SequencesTest {
     @Test
     void separatedPair() {
         final Parser<Pair<String, String>> parser =
-                Combinators.separatedPair(
-                        TextParsers.tag("abc"), TextParsers.tag("|"), TextParsers.tag("efg"));
+                Combinators.separatedPair(Parsers.tag("abc"), Parsers.tag("|"), Parsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abc|efg"))
                 .isOk(new Pair<>("abc", "efg"))
@@ -48,7 +45,7 @@ class SequencesTest {
     @Test
     void terminated() {
         final Parser<String> parser =
-                Combinators.terminated(TextParsers.tag("abc"), TextParsers.tag("efg"));
+                Combinators.terminated(Parsers.tag("abc"), Parsers.tag("efg"));
 
         assertThatParseResult(parser.parse("abcefg")).isOk("abc").hasRemainingInput("");
     }
@@ -56,8 +53,7 @@ class SequencesTest {
     @Test
     void triple() {
         final Parser<Triple<String, String, String>> parser =
-                Combinators.triple(
-                        TextParsers.alpha1(), TextParsers.digit1(), TextParsers.alpha1());
+                Combinators.triple(Parsers.alpha1(), Parsers.digit1(), Parsers.alpha1());
 
         assertThatParseResult(parser.parse("abc123def"))
                 .isOk(new Triple<>("abc", "123", "def"))

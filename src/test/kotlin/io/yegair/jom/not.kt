@@ -3,7 +3,7 @@
 package io.yegair.jom
 
 import io.yegair.jom.Combinators.not
-import io.yegair.jom.TextParsers.alpha1
+import io.yegair.jom.Parsers.alpha1
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
