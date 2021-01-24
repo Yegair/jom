@@ -14,7 +14,7 @@ class count {
     fun `should succeed if embedded parser can be applied exactly n times`() {
         val parser = count(tag("abc"), 2)
 
-        assertThatParseResult(parser.parse(Input.of("abcabc")))
+        assertThatParseResult(parser.parse("abcabc"))
             .isOk(listOf("abc", "abc"))
             .hasRemainingInput("")
     }
@@ -23,7 +23,7 @@ class count {
     fun `should succeed if embedded parser could be applied more than n times`() {
         val parser = count(tag("abc"), 2)
 
-        assertThatParseResult(parser.parse(Input.of("abcabcabc")))
+        assertThatParseResult(parser.parse("abcabcabc"))
             .isOk(listOf("abc", "abc"))
             .hasRemainingInput("abc")
     }
@@ -32,7 +32,7 @@ class count {
     fun `should succeed if embedded parser can be applied exactly n times with some input following`() {
         val parser = count(tag("abc"), 2)
 
-        assertThatParseResult(parser.parse(Input.of("abcabcab3")))
+        assertThatParseResult(parser.parse("abcabcab3"))
             .isOk(listOf("abc", "abc"))
             .hasRemainingInput("ab3")
     }
@@ -41,7 +41,7 @@ class count {
     fun `should fail if embedded parser can only be applied less than n times`() {
         val parser = count(tag("abc"), 2)
 
-        assertThatParseResult(parser.parse(Input.of("abc123")))
+        assertThatParseResult(parser.parse("abc123"))
             .isError(ParseError.Tag)
             .hasRemainingInput("abc123")
     }
@@ -50,7 +50,7 @@ class count {
     fun `should fail if embedded parser fails at least once`() {
         val parser = count(tag("abc"), 2)
 
-        assertThatParseResult(parser.parse(Input.of("abcab3")))
+        assertThatParseResult(parser.parse("abcab3"))
             .isError(ParseError.Tag)
             .hasRemainingInput("abcab3")
     }
@@ -59,7 +59,7 @@ class count {
     fun `should fail if embedded parser can not be applied at all`() {
         val parser = count(tag("abc"), 2)
 
-        assertThatParseResult(parser.parse(Input.of("123123")))
+        assertThatParseResult(parser.parse("123123"))
             .isError(ParseError.Tag)
             .hasRemainingInput("123123")
     }
@@ -68,7 +68,7 @@ class count {
     fun `should fail if embedded parser can not be applied at all due to empty input`() {
         val parser = count(tag("abc"), 2)
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isError(ParseError.Tag)
             .hasRemainingInput("")
     }
@@ -77,7 +77,7 @@ class count {
     fun `should parse empty input`() {
         val parser = count(alpha0(), 2)
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk(listOf("", ""))
             .hasRemainingInput("")
     }

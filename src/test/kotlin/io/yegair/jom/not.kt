@@ -13,7 +13,7 @@ class not {
     fun `should succeed when embedded parser fails`() {
         val parser = not(alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("123")))
+        assertThatParseResult(parser.parse("123"))
             .isOk(Unit)
             .hasRemainingInput("123")
     }
@@ -22,7 +22,7 @@ class not {
     fun `should fail when embedded parser succeeds`() {
         val parser = not(alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("abcd")))
+        assertThatParseResult(parser.parse("abcd"))
             .isError(ParseError.Not)
             .hasRemainingInput("abcd")
     }

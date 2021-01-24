@@ -13,7 +13,7 @@ class SequencesTest {
                 Sequences.delimited(
                         TextParsers.tag("abc"), TextParsers.tag("|"), TextParsers.tag("efg"));
 
-        assertThatParseResult(parser.parse(Input.of("abc|efg"))).isOk("|").hasRemainingInput("");
+        assertThatParseResult(parser.parse("abc|efg")).isOk("|").hasRemainingInput("");
     }
 
     @Test
@@ -21,7 +21,7 @@ class SequencesTest {
         final Parser<Pair<String, String>> parser =
                 Sequences.pair(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
-        assertThatParseResult(parser.parse(Input.of("abcefg")))
+        assertThatParseResult(parser.parse("abcefg"))
                 .isOk(new Pair<>("abc", "efg"))
                 .hasRemainingInput("");
     }
@@ -31,7 +31,7 @@ class SequencesTest {
         final Parser<String> parser =
                 Sequences.preceded(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
-        assertThatParseResult(parser.parse(Input.of("abcefg"))).isOk("efg").hasRemainingInput("");
+        assertThatParseResult(parser.parse("abcefg")).isOk("efg").hasRemainingInput("");
     }
 
     @Test
@@ -40,7 +40,7 @@ class SequencesTest {
                 Sequences.separatedPair(
                         TextParsers.tag("abc"), TextParsers.tag("|"), TextParsers.tag("efg"));
 
-        assertThatParseResult(parser.parse(Input.of("abc|efg")))
+        assertThatParseResult(parser.parse("abc|efg"))
                 .isOk(new Pair<>("abc", "efg"))
                 .hasRemainingInput("");
     }
@@ -50,7 +50,7 @@ class SequencesTest {
         final Parser<String> parser =
                 Sequences.terminated(TextParsers.tag("abc"), TextParsers.tag("efg"));
 
-        assertThatParseResult(parser.parse(Input.of("abcefg"))).isOk("abc").hasRemainingInput("");
+        assertThatParseResult(parser.parse("abcefg")).isOk("abc").hasRemainingInput("");
     }
 
     @Test
@@ -58,11 +58,11 @@ class SequencesTest {
         final Parser<Triple<String, String, String>> parser =
                 Sequences.triple(TextParsers.alpha1(), TextParsers.digit1(), TextParsers.alpha1());
 
-        assertThatParseResult(parser.parse(Input.of("abc123def")))
+        assertThatParseResult(parser.parse("abc123def"))
                 .isOk(new Triple<>("abc", "123", "def"))
                 .hasRemainingInput("");
 
-        assertThatParseResult(parser.parse(Input.of("123def")))
+        assertThatParseResult(parser.parse("123def"))
                 .isError(ParseError.Alpha)
                 .hasRemainingInput("123def");
     }

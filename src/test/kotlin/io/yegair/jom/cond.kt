@@ -14,7 +14,7 @@ class cond {
     fun `should apply parser if condition is met`() {
         val parser = cond(true, alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("abcd")))
+        assertThatParseResult(parser.parse("abcd"))
             .isOk("abcd")
             .hasRemainingInput("")
     }
@@ -23,7 +23,7 @@ class cond {
     fun `should not apply parser if condition is not met`() {
         val parser = cond(false, alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("abcd")))
+        assertThatParseResult(parser.parse("abcd"))
             .isOk(null)
             .hasRemainingInput("abcd")
     }
@@ -32,7 +32,7 @@ class cond {
     fun `should fail if condition is met and embedded parser fails`() {
         val parser = cond(true, alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("42Fu")))
+        assertThatParseResult(parser.parse("42Fu"))
             .isError(ParseError.Alpha)
             .hasRemainingInput("42Fu")
     }
@@ -41,7 +41,7 @@ class cond {
     fun `should not fail if condition is not met and embedded parser fails`() {
         val parser = cond(false, alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("42Fu")))
+        assertThatParseResult(parser.parse("42Fu"))
             .isOk(null)
             .hasRemainingInput("42Fu")
     }
@@ -50,7 +50,7 @@ class cond {
     fun `should accept empty input if condition is met`() {
         val parser = cond(true, alpha0())
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk("")
             .hasRemainingInput("")
     }
@@ -59,7 +59,7 @@ class cond {
     fun `should accept empty input if condition is not met`() {
         val parser = cond(false, alpha0())
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk(null)
             .hasRemainingInput("")
     }

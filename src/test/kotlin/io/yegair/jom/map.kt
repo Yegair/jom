@@ -13,7 +13,7 @@ class map {
     fun `should map result when embedded parser succeeds`() {
         val parser = map(digit1()) { it.length }
 
-        assertThatParseResult(parser.parse(Input.of("123456;")))
+        assertThatParseResult(parser.parse("123456;"))
             .isOk(6)
             .hasRemainingInput(";")
     }
@@ -22,7 +22,7 @@ class map {
     fun `should forward error when embedded parser fails`() {
         val parser = map(digit1()) { it.length }
 
-        assertThatParseResult(parser.parse(Input.of("abc;")))
+        assertThatParseResult(parser.parse("abc;"))
             .isError(ParseError.Digit)
             .hasRemainingInput("abc;")
     }

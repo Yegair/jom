@@ -14,7 +14,7 @@ class allConsuming {
     fun `should succeed if text input is fully parsed`() {
         val parser = allConsuming(alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("abcd")))
+        assertThatParseResult(parser.parse("abcd"))
             .isOk("abcd")
             .hasRemainingInput("")
     }
@@ -23,7 +23,7 @@ class allConsuming {
     fun `should fail if text input is not fully parsed`() {
         val parser = allConsuming(alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("abcd;")))
+        assertThatParseResult(parser.parse("abcd;"))
             .isError(ParseError.Eof)
             .hasRemainingInput("abcd;")
     }
@@ -32,7 +32,7 @@ class allConsuming {
     fun `should fail if embedded parser fails`() {
         val parser = allConsuming(alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("123;")))
+        assertThatParseResult(parser.parse("123;"))
             .isError(ParseError.Alpha)
             .hasRemainingInput("123;")
     }
@@ -41,7 +41,7 @@ class allConsuming {
     fun `should accept empty input`() {
         val parser = allConsuming(alpha0())
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk("")
             .hasRemainingInput("")
     }

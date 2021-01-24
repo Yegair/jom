@@ -12,7 +12,7 @@ class chr {
     fun `should parse single one byte char`() {
         val parser = chr('c')
 
-        assertThatParseResult(parser.parse(Input.of("ccc")))
+        assertThatParseResult(parser.parse("ccc"))
             .isOk('c')
             .hasRemainingInput("cc")
     }
@@ -21,7 +21,7 @@ class chr {
     fun `should parse single two byte char`() {
         val parser = chr('æ')
 
-        assertThatParseResult(parser.parse(Input.of("æææ")))
+        assertThatParseResult(parser.parse("æææ"))
             .isOk('æ')
             .hasRemainingInput("ææ")
     }
@@ -30,7 +30,7 @@ class chr {
     fun `should fail for invalid input`() {
         val parser = chr('c')
 
-        assertThatParseResult(parser.parse(Input.of("abc")))
+        assertThatParseResult(parser.parse("abc"))
             .isError(ParseError.Char)
             .hasRemainingInput("abc")
     }
@@ -39,7 +39,7 @@ class chr {
     fun `should fail for empty input`() {
         val parser = chr('c')
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isError(ParseError.Char)
             .hasRemainingInput("")
     }
@@ -50,7 +50,7 @@ class chr {
 
         // submit the first byte of a two-byte utf-8 code point
         // For example: [0xc3, 0xa6] = æ
-        assertThatParseResult(parser.parse(Input.of(byteArrayOf(0xc3.toByte()))))
+        assertThatParseResult(parser.parse(byteArrayOf(0xc3.toByte())))
             .isError(ParseError.Char)
             .hasRemainingInput(byteArrayOf(0xc3.toByte()))
     }

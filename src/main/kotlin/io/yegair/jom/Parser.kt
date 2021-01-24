@@ -11,7 +11,13 @@ fun interface Parser<O> {
      * Parses the given string and produces a parse result.
      */
     @JvmDefault
-    fun parse(input: String): ParseResult<O> = parse(Input.of(input))
+    fun parse(string: String): ParseResult<O> = parse(Input.of(string))
+
+    /**
+     * Parses the given string and produces a parse result.
+     */
+    @JvmDefault
+    fun parse(bytes: ByteArray): ParseResult<O> = parse(Input.of(bytes))
 
     companion object {
 

@@ -12,28 +12,28 @@ class digit1 {
 
     @Test
     fun `should parse single matching char`() {
-        assertThatParseResult(parser.parse(Input.of("9;")))
+        assertThatParseResult(parser.parse("9;"))
             .isOk("9")
             .hasRemainingInput(";")
     }
 
     @Test
     fun `should parse multiple matching chars`() {
-        assertThatParseResult(parser.parse(Input.of("42;")))
+        assertThatParseResult(parser.parse("42;"))
             .isOk("42")
             .hasRemainingInput(";")
     }
 
     @Test
     fun `should not parse non matching char`() {
-        assertThatParseResult(parser.parse(Input.of("M4")))
+        assertThatParseResult(parser.parse("M4"))
             .isError(ParseError.Digit)
             .hasRemainingInput("M4")
     }
 
     @Test
     fun `should not parse empty input`() {
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isError(ParseError.Digit)
             .hasRemainingInput("")
     }
@@ -42,7 +42,7 @@ class digit1 {
     fun `should not parse incomplete two byte utf8 codepoint`() {
         // submit the first byte of a two-byte utf-8 code point
         // For example: [0xc3, 0xa6] = æ
-        assertThatParseResult(parser.parse(Input.of(byteArrayOf(0xc3.toByte()))))
+        assertThatParseResult(parser.parse(byteArrayOf(0xc3.toByte())))
             .isError(ParseError.Digit)
             .hasRemainingInput(byteArrayOf(0xc3.toByte()))
     }

@@ -22,7 +22,7 @@ class recognize {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("abcd,end1")))
+        assertThatParseResult(parser.parse("abcd,end1"))
             .isOk("abcd,end")
             .hasRemainingInput("1")
     }
@@ -34,7 +34,7 @@ class recognize {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("Καλημέρα κόσμε")))
+        assertThatParseResult(parser.parse("Καλημέρα κόσμε"))
             .isOk("Καλημέρα")
             .hasRemainingInput(" κόσμε")
     }
@@ -46,7 +46,7 @@ class recognize {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("こんにちは 世界")))
+        assertThatParseResult(parser.parse("こんにちは 世界"))
             .isOk("こんにちは")
             .hasRemainingInput(" 世界")
     }
@@ -58,7 +58,7 @@ class recognize {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("👆👏 🌍")))
+        assertThatParseResult(parser.parse("👆👏 🌍"))
             .isOk("👆👏")
             .hasRemainingInput(" 🌍")
     }
@@ -70,7 +70,7 @@ class recognize {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("abcd,foo")))
+        assertThatParseResult(parser.parse("abcd,foo"))
             .isError(ParseError.Tag)
             .hasRemainingInput("abcd,foo")
     }
@@ -79,7 +79,7 @@ class recognize {
     fun `should accept empty input`() {
         val parser = recognize(alpha0(), StandardCharsets.UTF_8)
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk("")
             .hasRemainingInput("")
     }

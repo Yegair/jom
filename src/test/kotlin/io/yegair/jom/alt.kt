@@ -3,12 +3,8 @@
 package io.yegair.jom
 
 import io.yegair.jom.Branches.alt
-import io.yegair.jom.Combinators.allConsuming
-import io.yegair.jom.Input.Companion.of
-import io.yegair.jom.TextParsers.alpha0
 import io.yegair.jom.TextParsers.alpha1
 import io.yegair.jom.TextParsers.digit1
-import io.yegair.jom.test.ParseResultAssert
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 

@@ -2,7 +2,6 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.Input.Companion.of
 import io.yegair.jom.Sequences.pair
 import io.yegair.jom.TextParsers.alpha0
 import io.yegair.jom.TextParsers.alpha1
@@ -19,7 +18,7 @@ class pair {
     fun `should parse matching input`() {
         val parser = pair(chr('λ'), tag("fu"))
 
-        assertThatParseResult(parser.parse(of("λfu;")))
+        assertThatParseResult(parser.parse("λfu;"))
             .isOk(Pair('λ', "fu"))
             .hasRemainingInput(";")
     }
@@ -28,7 +27,7 @@ class pair {
     fun `should fail if first parser fails`() {
         val parser = pair(digit1(), alpha0())
 
-        assertThatParseResult(parser.parse(of("Foobar")))
+        assertThatParseResult(parser.parse("Foobar"))
             .isError(ParseError.Digit)
             .hasRemainingInput("Foobar")
     }
@@ -37,7 +36,7 @@ class pair {
     fun `should fail if second parser fails`() {
         val parser = pair(digit1(), alpha1())
 
-        assertThatParseResult(parser.parse(of("42")))
+        assertThatParseResult(parser.parse("42"))
             .isError(ParseError.Alpha)
             .hasRemainingInput("42")
     }
@@ -46,7 +45,7 @@ class pair {
     fun `should parse empty input`() {
         val parser = pair(alpha0(), digit0())
 
-        assertThatParseResult(parser.parse(of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk(Pair("", ""))
             .hasRemainingInput("")
     }

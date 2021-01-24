@@ -13,9 +13,7 @@ class BranchesTest {
         final Parser<String> parser = Branches.alt(TextParsers.alpha1(), TextParsers.digit1());
 
         // the first parser returns an error, so alt tries the second one
-        assertThatParseResult(parser.parse(Input.of("123456")))
-                .isOk("123456")
-                .hasRemainingInput("");
+        assertThatParseResult(parser.parse("123456")).isOk("123456").hasRemainingInput("");
     }
 
     @Test
@@ -23,7 +21,7 @@ class BranchesTest {
         final Parser<Pair<String, String>> parser =
                 Branches.permutation2(TextParsers.alpha1(), TextParsers.digit1());
 
-        assertThatParseResult(parser.parse(Input.of("123abc")))
+        assertThatParseResult(parser.parse("123abc"))
                 .isOk(new Pair<>("abc", "123"))
                 .hasRemainingInput("");
     }
@@ -31,10 +29,11 @@ class BranchesTest {
     @Test
     void permutation3() {
         final Parser<Triple<String, String, String>> parser =
-            Branches.permutation3(TextParsers.alpha1(), TextParsers.digit1(), TextParsers.lineEnding());
+                Branches.permutation3(
+                        TextParsers.alpha1(), TextParsers.digit1(), TextParsers.lineEnding());
 
-        assertThatParseResult(parser.parse(Input.of("123\nabc")))
-            .isOk(new Triple<>("abc", "123", "\n"))
-            .hasRemainingInput("");
+        assertThatParseResult(parser.parse("123\nabc"))
+                .isOk(new Triple<>("abc", "123", "\n"))
+                .hasRemainingInput("");
     }
 }

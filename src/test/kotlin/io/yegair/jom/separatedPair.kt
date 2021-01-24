@@ -21,7 +21,7 @@ class separatedPair {
     fun `should parse matching input`() {
         val parser = separatedPair(chr('λ'), digit1(), tag("fu"))
 
-        assertThatParseResult(parser.parse(Input.of("λ1337fu;")))
+        assertThatParseResult(parser.parse("λ1337fu;"))
             .isOk(Pair('λ', "fu"))
             .hasRemainingInput(";")
     }
@@ -30,7 +30,7 @@ class separatedPair {
     fun `should fail if first parser fails`() {
         val parser = separatedPair(digit1(), newline(), alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("Foobar")))
+        assertThatParseResult(parser.parse("Foobar"))
             .isError(ParseError.Digit)
             .hasRemainingInput("Foobar")
     }
@@ -39,7 +39,7 @@ class separatedPair {
     fun `should fail if second parser fails`() {
         val parser = separatedPair(digit1(), lineEnding(), alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("42Foo")))
+        assertThatParseResult(parser.parse("42Foo"))
             .isError(ParseError.CrLf)
             .hasRemainingInput("42Foo")
     }
@@ -48,7 +48,7 @@ class separatedPair {
     fun `should fail if third parser fails`() {
         val parser = separatedPair(digit1(), newline(), alpha1())
 
-        assertThatParseResult(parser.parse(Input.of("42\n13")))
+        assertThatParseResult(parser.parse("42\n13"))
             .isError(ParseError.Alpha)
             .hasRemainingInput("42\n13")
     }
@@ -57,7 +57,7 @@ class separatedPair {
     fun `should parse empty input`() {
         val parser = separatedPair(alpha0(), digit0(), opt(chr('!')))
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk(Pair("", null))
             .hasRemainingInput("")
     }

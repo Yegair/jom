@@ -23,7 +23,7 @@ class consumed {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("abcd,end1")))
+        assertThatParseResult(parser.parse("abcd,end1"))
             .isOk(Pair(true, "abcd,end"))
             .hasRemainingInput("1")
     }
@@ -35,7 +35,7 @@ class consumed {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("Καλημέρα κόσμε")))
+        assertThatParseResult(parser.parse("Καλημέρα κόσμε"))
             .isOk(Pair(42, "Καλημέρα"))
             .hasRemainingInput(" κόσμε")
     }
@@ -47,7 +47,7 @@ class consumed {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("こんにちは 世界")))
+        assertThatParseResult(parser.parse("こんにちは 世界"))
             .isOk(Pair(1337, "こんにちは"))
             .hasRemainingInput(" 世界")
     }
@@ -59,7 +59,7 @@ class consumed {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("👆👏 🌍")))
+        assertThatParseResult(parser.parse("👆👏 🌍"))
             .isOk(Pair(false, "👆👏"))
             .hasRemainingInput(" 🌍")
     }
@@ -71,7 +71,7 @@ class consumed {
             StandardCharsets.UTF_8
         )
 
-        assertThatParseResult(parser.parse(Input.of("abcd,foo")))
+        assertThatParseResult(parser.parse("abcd,foo"))
             .isError(ParseError.Tag)
             .hasRemainingInput("abcd,foo")
     }
@@ -80,7 +80,7 @@ class consumed {
     fun `should accept empty input`() {
         val parser = consumed(alpha0(), StandardCharsets.UTF_8)
 
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk(Pair("", ""))
             .hasRemainingInput("")
     }

@@ -3,7 +3,6 @@
 package io.yegair.jom
 
 import io.yegair.jom.Combinators.verify
-import io.yegair.jom.Input.Companion.of
 import io.yegair.jom.TextParsers.alpha0
 import io.yegair.jom.TextParsers.alpha1
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
@@ -15,7 +14,7 @@ class verify {
     fun `should succeed when result is valid`() {
         val parser = verify(alpha1()) { it.length == 4 }
 
-        assertThatParseResult(parser.parse(of("abcd")))
+        assertThatParseResult(parser.parse("abcd"))
             .isOk("abcd")
             .hasRemainingInput("")
     }
@@ -24,7 +23,7 @@ class verify {
     fun `should fail when result is invalid`() {
         val parser = verify(alpha1()) { it.length == 4 }
 
-        assertThatParseResult(parser.parse(of("abcde")))
+        assertThatParseResult(parser.parse("abcde"))
             .isError(ParseError.Verify)
             .hasRemainingInput("abcde")
     }
@@ -33,7 +32,7 @@ class verify {
     fun `should fail when embedded parser fails`() {
         val parser = verify(alpha1()) { it.length == 4 }
 
-        assertThatParseResult(parser.parse(of("123abcd;")))
+        assertThatParseResult(parser.parse("123abcd;"))
             .isError(ParseError.Alpha)
             .hasRemainingInput("123abcd;")
     }
@@ -42,7 +41,7 @@ class verify {
     fun `should accept empty input`() {
         val parser = verify(alpha0()) { it.length == 0 }
 
-        assertThatParseResult(parser.parse(of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk("")
             .hasRemainingInput("")
     }

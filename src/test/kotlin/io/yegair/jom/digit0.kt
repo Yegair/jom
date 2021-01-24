@@ -12,28 +12,28 @@ class digit0 {
 
     @Test
     fun `should parse single matching char`() {
-        assertThatParseResult(parser.parse(Input.of("3;")))
+        assertThatParseResult(parser.parse("3;"))
             .isOk("3")
             .hasRemainingInput(";")
     }
 
     @Test
     fun `should parse multiple matching chars`() {
-        assertThatParseResult(parser.parse(Input.of("21c")))
+        assertThatParseResult(parser.parse("21c"))
             .isOk("21")
             .hasRemainingInput("c")
     }
 
     @Test
     fun `should not parse non matching char`() {
-        assertThatParseResult(parser.parse(Input.of("a4")))
+        assertThatParseResult(parser.parse("a4"))
             .isOk("")
             .hasRemainingInput("a4")
     }
 
     @Test
     fun `should accept empty input`() {
-        assertThatParseResult(parser.parse(Input.of("")))
+        assertThatParseResult(parser.parse(""))
             .isOk("")
             .hasRemainingInput("")
     }
@@ -42,7 +42,7 @@ class digit0 {
     fun `should not parse incomplete two byte utf8 codepoint`() {
         // submit the first byte of a two-byte utf-8 code point
         // For example: [0xc3, 0xa6] = æ
-        assertThatParseResult(parser.parse(Input.of(byteArrayOf(0xc3.toByte()))))
+        assertThatParseResult(parser.parse(byteArrayOf(0xc3.toByte())))
             .isOk("")
             .hasRemainingInput(byteArrayOf(0xc3.toByte()))
     }
