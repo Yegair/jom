@@ -2,7 +2,7 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.Branches.alt
+import io.yegair.jom.Combinators.alt
 import io.yegair.jom.TextParsers.alpha1
 import io.yegair.jom.TextParsers.digit1
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult

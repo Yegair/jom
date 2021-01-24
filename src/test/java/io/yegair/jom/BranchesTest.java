@@ -10,7 +10,7 @@ class BranchesTest {
 
     @Test
     void alt() {
-        final Parser<String> parser = Branches.alt(TextParsers.alpha1(), TextParsers.digit1());
+        final Parser<String> parser = Combinators.alt(TextParsers.alpha1(), TextParsers.digit1());
 
         // the first parser returns an error, so alt tries the second one
         assertThatParseResult(parser.parse("123456")).isOk("123456").hasRemainingInput("");
@@ -19,7 +19,7 @@ class BranchesTest {
     @Test
     void permutation2() {
         final Parser<Pair<String, String>> parser =
-                Branches.permutation2(TextParsers.alpha1(), TextParsers.digit1());
+                Combinators.permutation2(TextParsers.alpha1(), TextParsers.digit1());
 
         assertThatParseResult(parser.parse("123abc"))
                 .isOk(new Pair<>("abc", "123"))
@@ -29,7 +29,7 @@ class BranchesTest {
     @Test
     void permutation3() {
         final Parser<Triple<String, String, String>> parser =
-                Branches.permutation3(
+                Combinators.permutation3(
                         TextParsers.alpha1(), TextParsers.digit1(), TextParsers.lineEnding());
 
         assertThatParseResult(parser.parse("123\nabc"))
