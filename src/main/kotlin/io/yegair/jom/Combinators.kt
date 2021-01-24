@@ -155,19 +155,23 @@ object Combinators {
     }
 
     /**
-     * Repeats the embedded parser until it fails and returns the results in a [List].
+     * Applies a parser until it fails and accumulates the results using a given function and initial value.
      */
-    @JvmStatic
-    fun <O> many0(parser: Parser<O>): Parser<List<O>> {
+    fun <O, I, R> foldMany0(
+        parser: Parser<O>,
+        initial: I,
+        operation: (I, O) -> I,
+        finalizer: (I) -> R
+    ): Parser<R> {
         return Parser { originalInput ->
             var input = originalInput.peek()
-            val output: MutableList<O> = LinkedList()
+            var intermediateResult = initial
 
             while (true) {
                 val res = parser.parse(input.peek())
 
                 if (!res.ok) {
-                    return@Parser ParseResult.ok(input, output)
+                    return@Parser ParseResult.ok(input, finalizer(intermediateResult))
                 }
 
                 if (input.bytesProcessed == res.remaining.bytesProcessed) {
@@ -176,7 +180,7 @@ object Combinators {
                 }
 
                 input = res.remaining
-                output.add(res.output)
+                intermediateResult = operation(intermediateResult, res.output)
             }
 
             @Suppress("UNREACHABLE_CODE")
@@ -184,22 +188,33 @@ object Combinators {
         }
     }
 
-    private fun unreachable(): Nothing {
-        throw IllegalStateException("unreachable code")
+    /**
+     * Applies a parser until it fails and accumulates the results using a given function and initial value.
+     */
+    fun <O, R> foldMany0(
+        parser: Parser<O>,
+        initial: R,
+        operation: (R, O) -> R
+    ): Parser<R> {
+        return foldMany0(parser, initial, operation, { it })
     }
 
     /**
-     * Runs the embedded parser until it fails and returns the results in a Vec.
-     * Fails if the embedded parser does not produce at least one result.
+     * Applies a parser until it fails and accumulates the results using a given function and initial value.
+     * Fails if the embedded parser does not succeed at least once.
      *
      * Note: If the parser passed to many1 accepts empty inputs (like alpha0 or digit0), many1 will return an error,
      * to prevent going into an infinite loop.
      */
     @JvmStatic
-    fun <O> many1(parser: Parser<O>): Parser<List<O>> {
+    fun <O, I, R> foldMany1(
+        parser: Parser<O>,
+        initial: I,
+        operation: (I, O) -> I,
+        finalizer: (I) -> R
+    ): Parser<R> {
         return Parser { input ->
-            val output: MutableList<O> = LinkedList()
-
+            var output = initial
             var result: ParseResult<O> = parser.parse(input.peek())
 
             if (!result.ok) {
@@ -214,13 +229,13 @@ object Combinators {
                 return@Parser ParseResult.error(input, ParseError.Many)
             }
 
-            output.add(result.output)
+            output = operation(output, result.output)
 
             while (true) {
                 val res = parser.parse(result.remaining.peek())
 
                 if (!res.ok) {
-                    return@Parser ParseResult.ok(result.remaining, output)
+                    return@Parser ParseResult.ok(result.remaining, finalizer(output))
                 }
 
                 if (result.remaining.bytesProcessed == res.remaining.bytesProcessed) {
@@ -229,12 +244,68 @@ object Combinators {
                 }
 
                 result = res
-                output.add(res.output)
+                output = operation(output, result.output)
             }
 
             @Suppress("UNREACHABLE_CODE")
             unreachable()
         }
+    }
+
+    /**
+     * Applies a parser until it fails and accumulates the results using a given function and initial value.
+     * Fails if the embedded parser does not succeed at least once.
+     *
+     * Note: If the parser passed to many1 accepts empty inputs (like alpha0 or digit0), many1 will return an error,
+     * to prevent going into an infinite loop.
+     */
+    @JvmStatic
+    fun <O, R> foldMany1(
+        parser: Parser<O>,
+        initial: R,
+        operation: (R, O) -> R
+    ): Parser<R> {
+        return foldMany1(parser, initial, operation, { it })
+    }
+
+    private fun unreachable(): Nothing {
+        throw IllegalStateException("unreachable code")
+    }
+
+    /**
+     * Repeats the embedded parser until it fails and returns the results in a [List].
+     */
+    @JvmStatic
+    fun <O> many0(parser: Parser<O>): Parser<List<O>> {
+        return foldMany0(
+            parser,
+            mutableListOf<O>(),
+            { list, item ->
+                list.add(item)
+                list
+            },
+            { it.toList() }
+        )
+    }
+
+    /**
+     * Runs the embedded parser until it fails and returns the results in a Vec.
+     * Fails if the embedded parser does not produce at least one result.
+     *
+     * Note: If the parser passed to many1 accepts empty inputs (like alpha0 or digit0), many1 will return an error,
+     * to prevent going into an infinite loop.
+     */
+    @JvmStatic
+    fun <O> many1(parser: Parser<O>): Parser<List<O>> {
+        return foldMany1(
+            parser,
+            mutableListOf<O>(),
+            { list, item ->
+                list.add(item)
+                list
+            },
+            { it.toList() }
+        )
     }
 
     /**
