@@ -323,6 +323,23 @@ object Combinators {
     }
 
     /**
+     * Maps a function on the result of a parser.
+     * Succeeds if the function returns a non-null result.
+     * Fails otherwise with [ParseError.MapOpt].
+     */
+    fun <O, R> mapOpt(parser: Parser<O>, mapping: (O) -> R?): Parser<R> {
+        return Parser { input ->
+            parser
+                .parse(input.peek())
+                .map { remaining, output ->
+                    mapping(output)
+                        ?.let { mapped -> ParseResult.ok(remaining, mapped) }
+                        ?: ParseResult.error(input, ParseError.MapOpt)
+                }
+        }
+    }
+
+    /**
      * Succeeds if the child parser returns an error.
      */
     @JvmStatic

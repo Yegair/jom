@@ -11,6 +11,7 @@ enum class ParseError {
     Eof,
     HexDigit,
     Many,
+    MapOpt,
     MultiSpace,
     NoneOf,
     Not,
