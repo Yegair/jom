@@ -163,6 +163,25 @@ object Parsers {
     fun tagNoCase(tag: String): Parser<String> {
         return Parser.peeking(tagInternal(tag, ParseError.Tag) { l, r -> l.utf8().equals(r.utf8(), ignoreCase = true) })
     }
+
+    /**
+     * Takes exactly the given number of bytes from the input and returns them as result.
+     * Fails with [ParseError.Eof] in case there is not enough input.
+     */
+    @JvmStatic
+    fun takeBytes(count: Long): Parser<ByteArray> {
+        require(count >= 0) { "count must not be negative but was $count" }
+
+        return Parser { input ->
+            val peek = input.peek()
+            val bytes = peek.readByteString(count)
+
+            when {
+                bytes.size < count -> ParseResult.error(input, ParseError.Eof)
+                else -> ParseResult.ok(peek, bytes.toByteArray())
+            }
+        }
+    }
 }
 
 private fun tagInternal(tag: String, error: ParseError, equality: (ByteString, ByteString) -> Boolean): Parser<String> {

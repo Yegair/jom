@@ -71,10 +71,18 @@ class ParseResultAssert<O> private constructor(
         val actualOutput = actual?.output
 
         if (!outputEquals(actualOutput, expected)) {
-            throw AssertionError("output does not match expected: <$expected> but was: <$actualOutput>")
+            throw AssertionError("output does not match expected: <${describe(expected)}> but was: <${describe(actualOutput)}>")
         }
 
         return this
+    }
+
+    private fun describe(value: Any?): String {
+        return when (value) {
+            is Array<*>? -> value.contentToString()
+            is ByteArray? -> "[${value?.joinToString { "%02x".format(it) } ?: ""}]"
+            else -> value.toString()
+        }
     }
 
     fun hasError(expected: ParseError): ParseResultAssert<O> {
@@ -93,6 +101,10 @@ class ParseResultAssert<O> private constructor(
 
     fun usingOutputComparator(comparator: Comparator<O?>): ParseResultAssert<O> {
         return ParseResultAssert(actual) { l, r -> comparator.compare(l, r) == 0 }
+    }
+
+    fun usingOutputComparator(comparator: (O?, O?) -> Boolean): ParseResultAssert<O> {
+        return ParseResultAssert(actual, comparator)
     }
 
     /**
@@ -136,7 +148,7 @@ class ParseResultAssert<O> private constructor(
             throw AssertionError(
                 """
                 remaining input does not match
-                expected: <${expected.contentToString()}> but was: <${remainingInput.contentToString()}>
+                expected: <${describe(expected)}> but was: <${describe(remainingInput)}>
                 """.trimIndent()
             )
         }
