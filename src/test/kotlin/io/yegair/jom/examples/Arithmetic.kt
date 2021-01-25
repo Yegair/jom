@@ -14,15 +14,15 @@ import io.yegair.jom.Parsers.tag
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
-fun parens(input: Input) = delimited(space0(), delimited(tag("("), ::expr, tag(")")), space0()).parse(input)
+private fun parens(input: Input) = delimited(space0(), delimited(tag("("), ::expr, tag(")")), space0()).parse(input)
 
-fun factor(input: Input) =
+private fun factor(input: Input) =
     alt(
         map(delimited(space0(), digit1(), space0())) { it.toLong() },
         ::parens
     ).parse(input)
 
-fun term(input: Input): ParseResult<Long> {
+private fun term(input: Input): ParseResult<Long> {
 
     val res1 = factor(input)
     if (!res1.ok) {
@@ -41,7 +41,7 @@ fun term(input: Input): ParseResult<Long> {
     ).parse(res1.remaining)
 }
 
-fun expr(input: Input): ParseResult<Long> {
+private fun expr(input: Input): ParseResult<Long> {
 
     val res = term(input)
     if (!res.ok) {
