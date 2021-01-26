@@ -5,10 +5,11 @@ package io.yegair.jom
 import io.yegair.jom.Combinators.pair
 import io.yegair.jom.Parsers.alpha0
 import io.yegair.jom.Parsers.alpha1
-import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.codePoint
 import io.yegair.jom.Parsers.digit0
 import io.yegair.jom.Parsers.digit1
 import io.yegair.jom.Parsers.tag
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
@@ -16,10 +17,10 @@ class pair {
 
     @Test
     fun `should parse matching input`() {
-        val parser = pair(chr('λ'), tag("fu"))
+        val parser = pair(codePoint('λ'), tag("fu"))
 
         assertThatParseResult(parser.parse("λfu;"))
-            .isOk(Pair('λ', "fu"))
+            .isOk(Pair('λ'.toUtf8CodePoint(), "fu"))
             .hasRemainingInput(";")
     }
 

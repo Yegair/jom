@@ -2,25 +2,40 @@
 
 package io.yegair.jom
 
-import io.yegair.jom.Parsers.anyChar
+import io.yegair.jom.Parsers.anyCodePoint
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
-class anyChar {
+class anyCodePoint {
 
-    private val parser = anyChar()
+    private val parser = anyCodePoint()
 
     @Test
-    fun `should parse single one byte char`() {
+    fun `should parse single 1-byte code point`() {
         assertThatParseResult(parser.parse("?;"))
-            .isOk('?')
+            .isOk('?'.toUtf8CodePoint())
             .hasRemainingInput(";")
     }
 
     @Test
-    fun `should parse single two byte char`() {
+    fun `should parse single 2-byte code point`() {
         assertThatParseResult(parser.parse("æ;"))
-            .isOk('æ')
+            .isOk('æ'.toUtf8CodePoint())
+            .hasRemainingInput(";")
+    }
+
+    @Test
+    fun `should parse single 3-byte code point`() {
+        assertThatParseResult(parser.parse("こ;"))
+            .isOk('こ'.toUtf8CodePoint())
+            .hasRemainingInput(";")
+    }
+
+    @Test
+    fun `should parse single 4-byte code point`() {
+        assertThatParseResult(parser.parse("🌍;"))
+            .isOk("🌍".toUtf8CodePoint())
             .hasRemainingInput(";")
     }
 

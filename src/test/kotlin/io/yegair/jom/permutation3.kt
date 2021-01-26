@@ -5,9 +5,10 @@ package io.yegair.jom
 import io.yegair.jom.Combinators.permutation3
 import io.yegair.jom.Parsers.alpha0
 import io.yegair.jom.Parsers.alpha1
-import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.codePoint
 import io.yegair.jom.Parsers.digit0
 import io.yegair.jom.Parsers.digit1
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
@@ -15,25 +16,25 @@ class permutation3 {
 
     @Test
     fun `should parse valid input in parser order`() {
-        val parser = permutation3(alpha1(), digit1(), chr('c'))
+        val parser = permutation3(alpha1(), digit1(), codePoint('c'))
 
         assertThatParseResult(parser.parse("ab123cd"))
-            .isOk(Triple("ab", "123", 'c'))
+            .isOk(Triple("ab", "123", 'c'.toUtf8CodePoint()))
             .hasRemainingInput("d")
     }
 
     @Test
     fun `should parse valid input in non parser order`() {
-        val parser = permutation3(alpha1(), digit1(), chr('c'))
+        val parser = permutation3(alpha1(), digit1(), codePoint('c'))
 
         assertThatParseResult(parser.parse("c123abcd"))
-            .isOk(Triple("abcd", "123", 'c'))
+            .isOk(Triple("abcd", "123", 'c'.toUtf8CodePoint()))
             .hasRemainingInput("")
     }
 
     @Test
     fun `should fail if first parser fails`() {
-        val parser = permutation3(alpha1(), digit1(), chr('c'))
+        val parser = permutation3(alpha1(), digit1(), codePoint('c'))
 
         assertThatParseResult(parser.parse(";123"))
             .isError
@@ -42,7 +43,7 @@ class permutation3 {
 
     @Test
     fun `should fail if second parser fails`() {
-        val parser = permutation3(alpha1(), digit1(), chr('c'))
+        val parser = permutation3(alpha1(), digit1(), codePoint('c'))
 
         assertThatParseResult(parser.parse("abc"))
             .isError

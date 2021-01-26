@@ -7,7 +7,7 @@ import io.yegair.jom.Combinators.separatedPair
 import io.yegair.jom.Combinators.value
 import io.yegair.jom.Parsers.alpha0
 import io.yegair.jom.Parsers.alpha1
-import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.codePoint
 import io.yegair.jom.Parsers.tag
 import io.yegair.jom.Parsers.tagNoCase
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
@@ -19,7 +19,7 @@ class consumed {
     @Test
     fun `should capture parsed input`() {
         val parser = consumed(
-            value(true, separatedPair(alpha1(), chr(','), tagNoCase("END"))),
+            value(true, separatedPair(alpha1(), codePoint(','), tagNoCase("END"))),
             StandardCharsets.UTF_8
         )
 
@@ -67,7 +67,7 @@ class consumed {
     @Test
     fun `should fail if embedded parser fails`() {
         val parser = consumed(
-            value(true, separatedPair(alpha1(), chr(','), tagNoCase("END"))),
+            value(true, separatedPair(alpha1(), codePoint(','), tagNoCase("END"))),
             StandardCharsets.UTF_8
         )
 

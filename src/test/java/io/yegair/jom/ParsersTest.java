@@ -39,16 +39,20 @@ class ParsersTest {
 
     @Test
     void anyChar() {
-        final Parser<Character> parser = Parsers.anyChar();
+        final Parser<Integer> parser = Parsers.anyCodePoint();
 
-        assertThatParseResult(parser.parse("abc")).isOk('a').hasRemainingInput("bc");
+        assertThatParseResult(parser.parse("abc"))
+                .isOk(Utf8CodePoints.of('a'))
+                .hasRemainingInput("bc");
     }
 
     @Test
     void chr() {
-        final Parser<Character> parser = Parsers.chr('a');
+        final Parser<Integer> parser = Parsers.codePoint('a');
 
-        assertThatParseResult(parser.parse("abc")).isOk('a').hasRemainingInput("bc");
+        assertThatParseResult(parser.parse("abc"))
+                .isOk(Utf8CodePoints.of('a'))
+                .hasRemainingInput("bc");
     }
 
     @Test
@@ -111,9 +115,11 @@ class ParsersTest {
 
     @Test
     void newline() {
-        final Parser<Character> parser = Parsers.newline();
+        final Parser<Integer> parser = Parsers.newline();
 
-        assertThatParseResult(parser.parse("\n")).isOk('\n').hasRemainingInput("");
+        assertThatParseResult(parser.parse("\n"))
+                .isOk(Utf8CodePoints.of('\n'))
+                .hasRemainingInput("");
     }
 
     @Test
@@ -146,9 +152,11 @@ class ParsersTest {
 
     @Test
     void oneOf() {
-        final Parser<String> parser = Parsers.oneOf("abc");
+        final Parser<Integer> parser = Parsers.oneOf("abc");
 
-        assertThatParseResult(parser.parse("abc")).isOk("a").hasRemainingInput("bc");
+        assertThatParseResult(parser.parse("abc"))
+                .isOk(Utf8CodePoints.of('a'))
+                .hasRemainingInput("bc");
     }
 
     @Test
@@ -174,9 +182,11 @@ class ParsersTest {
 
     @Test
     void tab() {
-        final Parser<Character> parser = Parsers.tab();
+        final Parser<Integer> parser = Parsers.tab();
 
-        assertThatParseResult(parser.parse("\t c")).isOk('\t').hasRemainingInput(" c");
+        assertThatParseResult(parser.parse("\t c"))
+                .isOk(Utf8CodePoints.of('\t'))
+                .hasRemainingInput(" c");
     }
 
     @Test

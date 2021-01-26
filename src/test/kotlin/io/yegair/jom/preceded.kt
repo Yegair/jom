@@ -5,7 +5,7 @@ package io.yegair.jom
 import io.yegair.jom.Combinators.preceded
 import io.yegair.jom.Parsers.alpha0
 import io.yegair.jom.Parsers.alpha1
-import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.codePoint
 import io.yegair.jom.Parsers.digit0
 import io.yegair.jom.Parsers.digit1
 import io.yegair.jom.Parsers.tag
@@ -16,7 +16,7 @@ class preceded {
 
     @Test
     fun `should parse matching input`() {
-        val parser = preceded(chr('λ'), tag("fu"))
+        val parser = preceded(codePoint('λ'), tag("fu"))
 
         assertThatParseResult(parser.parse("λfu;"))
             .isOk("fu")

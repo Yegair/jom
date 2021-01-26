@@ -7,10 +7,11 @@ import io.yegair.jom.Combinators.map
 import io.yegair.jom.Combinators.pair
 import io.yegair.jom.Input
 import io.yegair.jom.ParseResult
-import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.codePoint
 import io.yegair.jom.Parsers.digit1
 import io.yegair.jom.Parsers.space0
 import io.yegair.jom.Parsers.tag
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
@@ -30,11 +31,11 @@ private fun term(input: Input): ParseResult<Long> {
     }
 
     return foldMany0(
-        pair(alt(chr('*'), chr('/')), ::factor),
+        pair(alt(codePoint('*'), codePoint('/')), ::factor),
         res1.output,
         { acc, (op, value) ->
             when (op) {
-                '*' -> acc * value
+                '*'.toUtf8CodePoint() -> acc * value
                 else -> acc / value
             }
         }
@@ -49,11 +50,11 @@ private fun expr(input: Input): ParseResult<Long> {
     }
 
     return foldMany0(
-        pair(alt(chr('+'), chr('-')), ::term),
+        pair(alt(codePoint('+'), codePoint('-')), ::term),
         res.output,
         { acc, (op, value) ->
             when (op) {
-                '+' -> acc + value
+                '+'.toUtf8CodePoint() -> acc + value
                 else -> acc - value
             }
         }

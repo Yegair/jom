@@ -22,7 +22,7 @@ class CustomParserTest {
                         case (int) 'N':
                             return ParseResult.ok(peek, false);
                         default:
-                            return ParseResult.error(input, ParseError.Char);
+                            return ParseResult.error(input, ParseError.CodePoint);
                     }
                 };
 

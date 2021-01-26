@@ -34,7 +34,9 @@ class CombinatorsTest {
                         Combinators.value(
                                 true,
                                 Combinators.separatedPair(
-                                        Parsers.alpha1(), Parsers.chr(','), Parsers.alpha1())),
+                                        Parsers.alpha1(),
+                                        Parsers.codePoint(','),
+                                        Parsers.alpha1())),
                         StandardCharsets.UTF_8);
 
         assertThatParseResult(parser.parse("abcd,efgh1"))
@@ -108,13 +110,13 @@ class CombinatorsTest {
         final Parser<String> parser =
                 Combinators.recognize(
                         Combinators.separatedPair(
-                                Parsers.alpha1(), Parsers.chr(','), Parsers.alpha1()),
+                                Parsers.alpha1(), Parsers.codePoint(','), Parsers.alpha1()),
                         StandardCharsets.UTF_8);
 
         assertThatParseResult(parser.parse("abcd,efgh")).isOk("abcd,efgh").hasRemainingInput("");
 
         assertThatParseResult(parser.parse("abcd;"))
-                .isError(ParseError.Char)
+                .isError(ParseError.CodePoint)
                 .hasRemainingInput("abcd;");
     }
 

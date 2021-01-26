@@ -6,12 +6,13 @@ import io.yegair.jom.Combinators.opt
 import io.yegair.jom.Combinators.separatedPair
 import io.yegair.jom.Parsers.alpha0
 import io.yegair.jom.Parsers.alpha1
-import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.codePoint
 import io.yegair.jom.Parsers.digit0
 import io.yegair.jom.Parsers.digit1
 import io.yegair.jom.Parsers.lineEnding
 import io.yegair.jom.Parsers.newline
 import io.yegair.jom.Parsers.tag
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
@@ -19,10 +20,10 @@ class separatedPair {
 
     @Test
     fun `should parse matching input`() {
-        val parser = separatedPair(chr('λ'), digit1(), tag("fu"))
+        val parser = separatedPair(codePoint('λ'), digit1(), tag("fu"))
 
         assertThatParseResult(parser.parse("λ1337fu;"))
-            .isOk(Pair('λ', "fu"))
+            .isOk(Pair('λ'.toUtf8CodePoint(), "fu"))
             .hasRemainingInput(";")
     }
 
@@ -55,7 +56,7 @@ class separatedPair {
 
     @Test
     fun `should parse empty input`() {
-        val parser = separatedPair(alpha0(), digit0(), opt(chr('!')))
+        val parser = separatedPair(alpha0(), digit0(), opt(codePoint('!')))
 
         assertThatParseResult(parser.parse(""))
             .isOk(Pair("", null))

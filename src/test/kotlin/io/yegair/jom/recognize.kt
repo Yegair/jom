@@ -6,7 +6,7 @@ import io.yegair.jom.Combinators.recognize
 import io.yegair.jom.Combinators.separatedPair
 import io.yegair.jom.Parsers.alpha0
 import io.yegair.jom.Parsers.alpha1
-import io.yegair.jom.Parsers.chr
+import io.yegair.jom.Parsers.codePoint
 import io.yegair.jom.Parsers.tag
 import io.yegair.jom.Parsers.tagNoCase
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
@@ -18,7 +18,7 @@ class recognize {
     @Test
     fun `should recognize parsed input`() {
         val parser = recognize(
-            separatedPair(alpha1(), chr(','), tagNoCase("END")),
+            separatedPair(alpha1(), codePoint(','), tagNoCase("END")),
             StandardCharsets.UTF_8
         )
 
@@ -66,7 +66,7 @@ class recognize {
     @Test
     fun `should fail if embedded parser fails`() {
         val parser = recognize(
-            separatedPair(alpha1(), chr(','), tagNoCase("END")),
+            separatedPair(alpha1(), codePoint(','), tagNoCase("END")),
             StandardCharsets.UTF_8
         )
 

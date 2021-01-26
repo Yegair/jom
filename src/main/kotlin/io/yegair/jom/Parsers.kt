@@ -29,24 +29,24 @@ object Parsers {
     }
 
     @JvmStatic
-    fun anyChar(): Parser<Char> {
+    fun anyCodePoint(): Parser<Utf8CodePoint> {
         return Parser.peeking { input: Input ->
-            val chr = input.readUtf8CodePoint()
+            val cp = input.readUtf8CodePoint()
             when {
-                Input.isEof(chr) -> ParseResult.error(input, ParseError.Eof)
-                else -> ParseResult.ok(input, chr.toChar())
+                Input.isEof(cp) -> ParseResult.error(input, ParseError.Eof)
+                else -> ParseResult.ok(input, cp)
             }
         }
     }
 
     @JvmStatic
-    fun chr(expected: Char): Parser<Char> {
-        return Combinators.map(codePoint(expected.toUtf8CodePoint())) { codePoint -> codePoint.toChar() }
+    fun codePoint(expected: Char): Parser<Utf8CodePoint> {
+        return codePoint(expected.toUtf8CodePoint())
     }
 
     @JvmStatic
     fun codePoint(expected: Utf8CodePoint): Parser<Utf8CodePoint> {
-        return Parser.peeking(satisfyInternal(ParseError.Char) { codePoint -> codePoint == expected })
+        return Parser.peeking(satisfyInternal(ParseError.CodePoint) { codePoint -> codePoint == expected })
     }
 
     @JvmStatic
@@ -105,8 +105,8 @@ object Parsers {
     }
 
     @JvmStatic
-    fun newline(): Parser<Char> {
-        return chr('\n')
+    fun newline(): Parser<Utf8CodePoint> {
+        return codePoint('\n')
     }
 
     @JvmStatic
@@ -136,10 +136,13 @@ object Parsers {
     }
 
     @JvmStatic
-    fun oneOf(codePoints: String): Parser<String> {
+    fun oneOf(codePoints: String): Parser<Utf8CodePoint> {
         val codePointsSet = codePoints.toUtf8CodePoints().toSet()
-        val parser = Parser.peeking(satisfyInternal(ParseError.OneOf) { chr -> codePointsSet.contains(chr) })
-        return Combinators.map(parser) { it.utf8() }
+        return Parser.peeking(
+            satisfyInternal(ParseError.OneOf) { chr ->
+                codePointsSet.contains(chr)
+            }
+        )
     }
 
     @JvmStatic
@@ -158,7 +161,7 @@ object Parsers {
     }
 
     @JvmStatic
-    fun tab(): Parser<Char> = chr('\t')
+    fun tab(): Parser<Utf8CodePoint> = codePoint('\t')
 
     @JvmStatic
     fun tag(tag: String): Parser<String> {

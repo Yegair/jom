@@ -41,11 +41,11 @@ class Input private constructor(
      * Reads and consumes a single UTF8 code point (1-4 bytes).
      */
     fun readUtf8CodePoint(): Utf8CodePoint = when {
-        source.exhausted() -> -1
+        source.exhausted() -> CODE_POINT_EOF
         else -> try {
             source.readUtf8CodePoint()
         } catch (e: EOFException) {
-            -1
+            CODE_POINT_EOF
         }
     }
 
@@ -64,8 +64,11 @@ class Input private constructor(
     }
 
     companion object {
-        fun isEof(chr: Int): Boolean {
-            return chr < 0
+        const val CODE_POINT_EOF = -1
+
+        @JvmStatic
+        fun isEof(cp: Int): Boolean {
+            return cp == CODE_POINT_EOF
         }
 
         @JvmStatic

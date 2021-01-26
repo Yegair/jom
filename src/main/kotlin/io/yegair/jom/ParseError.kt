@@ -3,7 +3,7 @@ package io.yegair.jom
 enum class ParseError {
     Alpha,
     AlphaNumeric,
-    Char,
+    CodePoint,
     Choice,
     CrLf,
     Count,
