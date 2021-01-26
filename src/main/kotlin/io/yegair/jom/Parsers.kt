@@ -1,5 +1,7 @@
 package io.yegair.jom
 
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoints
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.utf8Size
@@ -108,10 +110,14 @@ object Parsers {
     }
 
     @JvmStatic
-    fun noneOf(codePoints: String): Parser<String> {
+    fun noneOf(codePoints: String): Parser<Utf8CodePoint> {
         val codePointsSet = codePoints.toUtf8CodePoints().toSet()
-        val parser = Parser.peeking(satisfyInternal(ParseError.NoneOf) { cp -> !codePointsSet.contains(cp) })
-        return Combinators.map(parser) { it.utf8() }
+        return Parser.peeking(
+            satisfyInternal(ParseError.NoneOf) {
+                cp ->
+                !codePointsSet.contains(cp)
+            }
+        )
     }
 
     @JvmStatic

@@ -118,9 +118,9 @@ class ParsersTest {
 
     @Test
     void noneOf() {
-        final Parser<String> parser = Parsers.noneOf("abc");
+        final Parser<Integer> parser = Parsers.noneOf("abc");
 
-        assertThatParseResult(parser.parse("z")).isOk("z").hasRemainingInput("");
+        assertThatParseResult(parser.parse("z")).isOk(Utf8CodePoints.of('z')).hasRemainingInput("");
     }
 
     @Test

@@ -3,6 +3,7 @@
 package io.yegair.jom
 
 import io.yegair.jom.Parsers.noneOf
+import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test
 
@@ -11,28 +12,28 @@ class noneOf {
     @Test
     fun `should parse matching 1-byte utf-8 codepoint`() {
         assertThatParseResult(noneOf("bc").parse("ab"))
-            .isOk("a")
+            .isOk('a'.toUtf8CodePoint())
             .hasRemainingInput("b")
     }
 
     @Test
     fun `should parse matching 2-byte utf-8 codepoint`() {
         assertThatParseResult(noneOf("æȻ").parse("ǿȻ"))
-            .isOk("ǿ")
+            .isOk('ǿ'.toUtf8CodePoint())
             .hasRemainingInput("Ȼ")
     }
 
     @Test
     fun `should parse matching 3-byte utf-8 codepoint`() {
         assertThatParseResult(noneOf("₤₿").parse("₵₿"))
-            .isOk("₵")
+            .isOk('₵'.toUtf8CodePoint())
             .hasRemainingInput("₿")
     }
 
     @Test
     fun `should parse matching 4-byte utf-8 codepoint`() {
         assertThatParseResult(noneOf("𓀠𓀡").parse("𓀓𓁏"))
-            .isOk("𓀓")
+            .isOk("𓀓".toUtf8CodePoint())
             .hasRemainingInput("𓁏")
     }
 
