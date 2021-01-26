@@ -474,6 +474,35 @@ object Combinators {
     }
 
     /**
+     * Alternates between two parsers to produce a list of elements.
+     */
+    fun <O> separatedList0(
+        separator: Parser<*>,
+        parser: Parser<O>
+    ): Parser<List<O>> {
+        return Parser { input ->
+            val first = parser.parse(input.peek())
+
+            if (!first.ok) {
+                return@Parser ParseResult.ok(input, emptyList())
+            }
+
+            val rest = foldMany0(
+                preceded(separator, parser),
+                mutableListOf<O>(),
+                { list, item ->
+                    list.add(item)
+                    list
+                }
+            ).parse(first.remaining)
+
+            rest.map { remaining, result ->
+                ParseResult.ok(remaining, listOf(first.output) + result)
+            }
+        }
+    }
+
+    /**
      * Gets a result from the first parser,
      * then matches a result from the sep_parser and discards it,
      * then gets another result from the second parser.
