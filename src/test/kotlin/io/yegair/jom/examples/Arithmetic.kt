@@ -32,7 +32,7 @@ private fun term(input: Input): ParseResult<Long> {
 
     return foldMany0(
         pair(alt(codePoint('*'), codePoint('/')), ::factor),
-        res1.output,
+        { res1.output },
         { acc, (op, value) ->
             when (op) {
                 '*'.toUtf8CodePoint() -> acc * value
@@ -51,7 +51,7 @@ private fun expr(input: Input): ParseResult<Long> {
 
     return foldMany0(
         pair(alt(codePoint('+'), codePoint('-')), ::term),
-        res.output,
+        { res.output },
         { acc, (op, value) ->
             when (op) {
                 '+'.toUtf8CodePoint() -> acc + value

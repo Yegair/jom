@@ -14,7 +14,7 @@ class foldMany0 {
 
     @Test
     fun `should succeed if embedded parser can be applied once`() {
-        val parser = foldMany0(tag("abc"), listOf<String>()) { list, item -> list + item }
+        val parser = foldMany0(tag("abc"), { listOf<String>() }) { list, item -> list + item }
 
         assertThatParseResult(parser.parse("abc1"))
             .isOk(listOf("abc"))
@@ -23,7 +23,7 @@ class foldMany0 {
 
     @Test
     fun `should succeed if embedded parser can be applied more than once`() {
-        val parser = foldMany0(tag("abc"), listOf<String>()) { list, item -> list + item }
+        val parser = foldMany0(tag("abc"), { listOf<String>() }) { list, item -> list + item }
 
         assertThatParseResult(parser.parse("abcabc;"))
             .isOk(listOf("abc", "abc"))
@@ -32,7 +32,7 @@ class foldMany0 {
 
     @Test
     fun `should succeed if embedded parser fails after succeeding once`() {
-        val parser = foldMany0(tag("abc"), listOf<String>()) { list, item -> list + item }
+        val parser = foldMany0(tag("abc"), { listOf<String>() }) { list, item -> list + item }
 
         assertThatParseResult(parser.parse("abcab3"))
             .isOk(listOf("abc"))
@@ -41,7 +41,7 @@ class foldMany0 {
 
     @Test
     fun `should succeed if embedded parser can not be applied`() {
-        val parser = foldMany0(tag("abc"), listOf<String>()) { list, item -> list + item }
+        val parser = foldMany0(tag("abc"), { listOf<String>() }) { list, item -> list + item }
 
         assertThatParseResult(parser.parse("123123"))
             .isOk(emptyList())
@@ -50,7 +50,7 @@ class foldMany0 {
 
     @Test
     fun `should parse empty input`() {
-        val parser = foldMany0(tag("abc"), listOf<String>()) { list, item -> list + item }
+        val parser = foldMany0(tag("abc"), { listOf<String>() }) { list, item -> list + item }
 
         assertThatParseResult(parser.parse(""))
             .isOk(emptyList())
@@ -59,7 +59,7 @@ class foldMany0 {
 
     @Test
     fun `should detect non terminating parser for empty input`() {
-        val parser = foldMany0(alpha0(), listOf<String>()) { list, item -> list + item }
+        val parser = foldMany0(alpha0(), { listOf<String>() }) { list, item -> list + item }
 
         assertThatParseResult(parser.parse(""))
             .isError(ParseError.Many)
@@ -68,7 +68,10 @@ class foldMany0 {
 
     @Test
     fun `should detect non terminating parser`() {
-        val parser = foldMany0(pair(alpha0(), digit0()), listOf<Pair<String, String>>()) { list, item -> list + item }
+        val parser = foldMany0(
+            pair(alpha0(), digit0()),
+            { listOf<Pair<String, String>>() }
+        ) { list, item -> list + item }
 
         assertThatParseResult(parser.parse("R2D"))
             .isError(ParseError.Many)

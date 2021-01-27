@@ -159,13 +159,13 @@ object Combinators {
      */
     fun <O, I, R> foldMany0(
         parser: Parser<O>,
-        initial: I,
+        initial: () -> I,
         operation: (I, O) -> I,
         finalizer: (I) -> R
     ): Parser<R> {
         return Parser { originalInput ->
             var input = originalInput.peek()
-            var intermediateResult = initial
+            var intermediateResult = initial()
 
             while (true) {
                 val res = parser.parse(input.peek())
@@ -193,7 +193,7 @@ object Combinators {
      */
     fun <O, R> foldMany0(
         parser: Parser<O>,
-        initial: R,
+        initial: () -> R,
         operation: (R, O) -> R
     ): Parser<R> {
         return foldMany0(parser, initial, operation, { it })
@@ -209,12 +209,12 @@ object Combinators {
     @JvmStatic
     fun <O, I, R> foldMany1(
         parser: Parser<O>,
-        initial: I,
+        initial: () -> I,
         operation: (I, O) -> I,
         finalizer: (I) -> R
     ): Parser<R> {
         return Parser { input ->
-            var output = initial
+            var output = initial()
             var result: ParseResult<O> = parser.parse(input.peek())
 
             if (!result.ok) {
@@ -262,7 +262,7 @@ object Combinators {
     @JvmStatic
     fun <O, R> foldMany1(
         parser: Parser<O>,
-        initial: R,
+        initial: () -> R,
         operation: (R, O) -> R
     ): Parser<R> {
         return foldMany1(parser, initial, operation, { it })
@@ -279,12 +279,12 @@ object Combinators {
     fun <O> many0(parser: Parser<O>): Parser<List<O>> {
         return foldMany0(
             parser,
-            mutableListOf<O>(),
+            ::mutableListOf,
             { list, item ->
                 list.add(item)
                 list
             },
-            { it.toList() }
+            MutableList<O>::toList
         )
     }
 
@@ -299,12 +299,12 @@ object Combinators {
     fun <O> many1(parser: Parser<O>): Parser<List<O>> {
         return foldMany1(
             parser,
-            mutableListOf<O>(),
+            ::mutableListOf,
             { list, item ->
                 list.add(item)
                 list
             },
-            { it.toList() }
+            MutableList<O>::toList
         )
     }
 
@@ -487,9 +487,9 @@ object Combinators {
                 return@Parser ParseResult.ok(input, emptyList())
             }
 
-            val rest = foldMany0(
+            val rest = foldMany0<O, MutableList<O>>(
                 preceded(separator, parser),
-                mutableListOf<O>(),
+                ::mutableListOf,
                 { list, item ->
                     list.add(item)
                     list
