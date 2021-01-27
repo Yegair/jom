@@ -69,6 +69,8 @@ fun projectVersion(): String? {
     return normalizedVersion?.trim()
 }
 
+val githubRepo = System.getenv("GITHUB_REPOSITORY")
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -76,8 +78,6 @@ publishing {
             artifactId = rootProject.name
             version = projectVersion()
             from(components["java"])
-
-            val githubRepo = System.getenv("GITHUB_REPOSITORY")
 
             pom {
                 name.set("jom")
@@ -100,6 +100,7 @@ publishing {
     }
 
     repositories {
+
         maven {
             name = "OSSRH"
             url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
@@ -108,6 +109,16 @@ publishing {
                 password = System.getenv("OSSRH_PASSWORD")
             }
         }
+
+        maven {
+            name = "GithubPackages"
+            url = uri("https://maven.pkg.github.com/$githubRepo")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+
         // maven {
         //     name = "Test"
         //     url = uri("$buildDir/test-publish")

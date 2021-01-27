@@ -25,9 +25,11 @@ jobs:
           ./gradlew
           -Porg.gradle.java.installations.auto-download=false
           -DjavaLanguageVersion=1.8
+          test
+          build
           publish
         env:
           PROJECT_VERSION: ${{ github.event.release.tag_name }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
