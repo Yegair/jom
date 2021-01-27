@@ -161,6 +161,11 @@ object Parsers {
     }
 
     @JvmStatic
+    fun success(): Parser<Unit> {
+        return Parser { input -> ParseResult.ok(input, Unit) }
+    }
+
+    @JvmStatic
     fun tab(): Parser<Utf8CodePoint> = codePoint('\t')
 
     @JvmStatic
