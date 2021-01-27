@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm").version("1.4.21")
     `java-library`
     id("com.diffplug.spotless").version("5.9.0")
+    `maven-publish`
 }
 
 fun getJavaLanguageVersion(): JavaLanguageVersion {
@@ -17,6 +18,8 @@ java {
     toolchain {
         languageVersion.set(getJavaLanguageVersion())
     }
+    withJavadocJar()
+    withSourcesJar()
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -49,5 +52,65 @@ spotless {
 
     java {
         googleJavaFormat("1.7").aosp()
+    }
+}
+
+fun projectVersion(): String? {
+    val configuredVersion: String? = System.getenv("PROJECT_VERSION")
+
+    val normalizedVersion = when {
+        configuredVersion == null -> null
+        configuredVersion.isBlank() -> null
+        configuredVersion.startsWith("v") -> configuredVersion.removePrefix("v")
+        configuredVersion.startsWith("V") -> configuredVersion.removePrefix("V")
+        else -> configuredVersion
+    }
+
+    return normalizedVersion?.trim()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "io.yegair.jom"
+            artifactId = rootProject.name
+            version = projectVersion()
+            from(components["java"])
+
+            val githubRepo = System.getenv("GITHUB_REPOSITORY")
+
+            pom {
+                name.set("jom")
+                description.set("Kotlin/JVM parser combinator library")
+                url.set("https://github.com/$githubRepo")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                        distribution.set("repo")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/$githubRepo.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/$githubRepo.git")
+                    url.set("https://github.com/$githubRepo")
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = System.getenv("OSSRH_USERNAME")
+                password = System.getenv("OSSRH_PASSWORD")
+            }
+        }
+        // maven {
+        //     name = "Test"
+        //     url = uri("$buildDir/test-publish")
+        // }
     }
 }
