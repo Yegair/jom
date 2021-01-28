@@ -5,6 +5,7 @@ plugins {
     `java-library`
     id("com.diffplug.spotless").version("5.9.0")
     `maven-publish`
+    signing
 }
 
 fun getJavaLanguageVersion(): JavaLanguageVersion {
@@ -131,4 +132,11 @@ publishing {
         //     url = uri("$buildDir/test-publish")
         // }
     }
+}
+
+signing {
+    val signingKey = System.getenv("GPG_SIGNING_KEY")
+    val signingPassphrase = System.getenv("GPG_SIGNING_PASSPHRASE")
+    useInMemoryPgpKeys(signingKey, signingPassphrase)
+    sign(publishing.publications["maven"])
 }
