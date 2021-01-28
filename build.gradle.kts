@@ -95,6 +95,13 @@ publishing {
                     developerConnection.set("scm:git:ssh://git@github.com/$githubRepo.git")
                     url.set("https://github.com/$githubRepo")
                 }
+                developers {
+                    developer {
+                        id.set("yegair")
+                        name.set("Hauke Jäger")
+                        email.set("oss@yegair.io")
+                    }
+                }
             }
         }
     }
