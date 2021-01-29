@@ -1,0 +1,33 @@
+---
+id: installation
+title: Installation
+slug: ./
+---
+import {projectVersion} from '../../vars';
+
+<p>
+    <em>jom</em> is distributed as a Maven package via the <a href="https://search.maven.org/artifact/io.yegair.jom/jom" target="_blank">central repository</a>.
+    The most recent version is <code>{projectVersion}</code>.
+</p>
+
+## Gradle
+
+```kotlin title="build.gradle.kts"
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("io.yegair.jom:jom:$jomVersion")
+}
+```
+
+## Maven
+
+```xml title="pom.xml"
+<dependency>
+  <groupId>io.yegair.jom</groupId>
+  <artifactId>jom</artifactId>
+  <version>${jom.version}</version>
+</dependency>
+```
