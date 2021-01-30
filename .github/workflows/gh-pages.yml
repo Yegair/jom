@@ -1,0 +1,61 @@
+name: Pages
+
+on: [push]
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
+
+jobs:
+  build-api-docs:
+    name: Build API docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+      - name: Configure JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build Dokka HTML
+        run: >-
+          ./gradlew
+          -Porg.gradle.java.installations.auto-download=false
+          -DjavaLanguageVersion=1.8
+          dokkaHtml
+      - name: Upload Dokka HTML
+        uses: actions/upload-artifact@v2
+        with:
+          name: dokka-html
+          path: build/dokka/html/
+          retention-days: 14
+
+  build-and-deploy-pages:
+    name: Build & Deploy Pages
+    runs-on: ubuntu-latest
+    needs:
+      - build-api-docs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: '12.x'
+      - name: Download Dokka HTML
+        uses: actions/download-artifact@v2
+        with:
+          name: dokka-html
+          path: pages/static/api
+      - run: ls -R
+        working-directory: pages/static/api
+      - run: yarn install --frozen-lockfile
+        working-directory: pages
+      - run: yarn build
+        working-directory: pages
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages/build
