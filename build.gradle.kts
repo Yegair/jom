@@ -6,6 +6,7 @@ plugins {
     id("com.diffplug.spotless").version("5.9.0")
     `maven-publish`
     signing
+    id("org.jetbrains.dokka").version("1.4.20")
 }
 
 fun getJavaLanguageVersion(): JavaLanguageVersion {
@@ -54,6 +55,10 @@ spotless {
     java {
         googleJavaFormat("1.7").aosp()
     }
+}
+
+tasks.dokkaGfm.configure {
+
 }
 
 fun projectVersion(): String? {
