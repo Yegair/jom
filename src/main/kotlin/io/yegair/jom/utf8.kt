@@ -83,6 +83,18 @@ object Utf8CodePoints {
         }
     }
 
+    /**
+     * Tests whether a given code point is a lower case letter.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isLowerCase(): Boolean = Character.isLowerCase(this)
+
+    /**
+     * Tests whether a given code point is an upper case letter.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isUpperCase(): Boolean = Character.isUpperCase(this)
+
     @JvmStatic
     fun Utf8CodePoint?.equalsIgnoreCase(other: Utf8CodePoint?): Boolean {
         return when {

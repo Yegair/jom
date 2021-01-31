@@ -10,22 +10,22 @@ object Parsers {
 
     @JvmStatic
     fun alpha0(): Parser<String> {
-        return satisfy0Internal { c -> c.isAlpha() }
+        return satisfy0Internal { c, _ -> c.isAlpha() }
     }
 
     @JvmStatic
     fun alpha1(): Parser<String> {
-        return satisfy1Internal(ParseError.Alpha) { c -> c.isAlpha() }
+        return satisfy1Internal(ParseError.Alpha) { c, _ -> c.isAlpha() }
     }
 
     @JvmStatic
     fun alphaNumeric0(): Parser<String> {
-        return satisfy0Internal { c -> c.isAlphaNumeric() }
+        return satisfy0Internal { c, _ -> c.isAlphaNumeric() }
     }
 
     @JvmStatic
     fun alphaNumeric1(): Parser<String> {
-        return satisfy1Internal(ParseError.AlphaNumeric) { c -> c.isAlphaNumeric() }
+        return satisfy1Internal(ParseError.AlphaNumeric) { c, _ -> c.isAlphaNumeric() }
     }
 
     @JvmStatic
@@ -56,22 +56,22 @@ object Parsers {
 
     @JvmStatic
     fun digit0(): Parser<String> {
-        return satisfy0Internal { c -> c.isDigit() }
+        return satisfy0Internal { c, _ -> c.isDigit() }
     }
 
     @JvmStatic
     fun digit1(): Parser<String> {
-        return satisfy1Internal(ParseError.Digit) { c -> c.isDigit() }
+        return satisfy1Internal(ParseError.Digit) { c, _ -> c.isDigit() }
     }
 
     @JvmStatic
     fun hexDigit0(): Parser<String> {
-        return satisfy0Internal { c -> c.isHexDigit() }
+        return satisfy0Internal { c, _ -> c.isHexDigit() }
     }
 
     @JvmStatic
     fun hexDigit1(): Parser<String> {
-        return satisfy1Internal(ParseError.HexDigit) { c -> c.isHexDigit() }
+        return satisfy1Internal(ParseError.HexDigit) { c, _ -> c.isHexDigit() }
     }
 
     @JvmStatic
@@ -96,12 +96,12 @@ object Parsers {
 
     @JvmStatic
     fun multiSpace0(): Parser<String> {
-        return satisfy0Internal { c -> c.isMultiSpace() }
+        return satisfy0Internal { c, _ -> c.isMultiSpace() }
     }
 
     @JvmStatic
     fun multiSpace1(): Parser<String> {
-        return satisfy1Internal(ParseError.MultiSpace) { c -> c.isMultiSpace() }
+        return satisfy1Internal(ParseError.MultiSpace) { c, _ -> c.isMultiSpace() }
     }
 
     @JvmStatic
@@ -122,17 +122,17 @@ object Parsers {
 
     @JvmStatic
     fun notLineEnding(): Parser<String> {
-        return satisfy0Internal { cp -> cp.toChar().let { chr -> chr != '\n' && chr != '\r' } }
+        return satisfy0Internal { cp, _ -> cp.toChar().let { chr -> chr != '\n' && chr != '\r' } }
     }
 
     @JvmStatic
     fun octDigit0(): Parser<String> {
-        return satisfy0Internal { cp -> cp.isOctDigit() }
+        return satisfy0Internal { cp, _ -> cp.isOctDigit() }
     }
 
     @JvmStatic
     fun octDigit1(): Parser<String> {
-        return satisfy1Internal(ParseError.OctDigit) { cp -> cp.isOctDigit() }
+        return satisfy1Internal(ParseError.OctDigit) { cp, _ -> cp.isOctDigit() }
     }
 
     @JvmStatic
@@ -150,14 +150,30 @@ object Parsers {
         return Parser.peeking(satisfyInternal(ParseError.Satisfy, predicate))
     }
 
+    /**
+     * Returns the longest input slice (if any) that matches the predicate.
+     */
+    @JvmStatic
+    fun satisfy0(predicate: (Utf8CodePoint, Int) -> Boolean): Parser<String> {
+        return satisfy0Internal(predicate)
+    }
+
+    /**
+     * Returns the longest input slice (if any) that matches the predicate.
+     */
+    @JvmStatic
+    fun satisfy1(predicate: (Utf8CodePoint, Int) -> Boolean): Parser<String> {
+        return satisfy1Internal(ParseError.Satisfy, predicate)
+    }
+
     @JvmStatic
     fun space0(): Parser<String> {
-        return satisfy0Internal { cp -> cp.isSpace() }
+        return satisfy0Internal { cp, _ -> cp.isSpace() }
     }
 
     @JvmStatic
     fun space1(): Parser<String> {
-        return satisfy1Internal(ParseError.Space) { cp -> cp.isSpace() }
+        return satisfy1Internal(ParseError.Space) { cp, _ -> cp.isSpace() }
     }
 
     @JvmStatic
@@ -228,22 +244,23 @@ private fun satisfyInternal(error: ParseError, predicate: (Utf8CodePoint) -> Boo
     }
 }
 
-private fun satisfy0Internal(predicate: (Utf8CodePoint) -> Boolean): Parser<String> {
+private fun satisfy0Internal(predicate: (Utf8CodePoint, Int) -> Boolean): Parser<String> {
     return Parser { input ->
 
         val output = StringBuilder()
         val peek = input.peek()
-        var chr: Int
+        var codePoint: Utf8CodePoint
+        var index = 0
 
-        while (!Input.isEof(peek.readUtf8CodePoint().also { chr = it })) {
+        while (!Input.isEof(peek.readUtf8CodePoint().also { codePoint = it })) {
 
-            if (!predicate(chr)) {
+            if (!predicate(codePoint, index++)) {
                 val result = output.toString()
                 input.skip(result.utf8Size())
                 return@Parser ParseResult.ok(input, result)
             }
 
-            output.append(chr.toChar())
+            output.appendCodePoint(codePoint)
         }
 
         val result = output.toString()
@@ -252,23 +269,24 @@ private fun satisfy0Internal(predicate: (Utf8CodePoint) -> Boolean): Parser<Stri
     }
 }
 
-private fun satisfy1Internal(error: ParseError, predicate: (Utf8CodePoint) -> Boolean): Parser<String> {
+private fun satisfy1Internal(error: ParseError, predicate: (Utf8CodePoint, Int) -> Boolean): Parser<String> {
     return Parser { input ->
         val peek = input.peek()
-        var chr = peek.readUtf8CodePoint()
+        var codePoint = peek.readUtf8CodePoint()
 
-        if (Input.isEof(chr)) {
+        if (Input.isEof(codePoint)) {
             return@Parser ParseResult.error<String>(input, error)
         }
 
-        if (!predicate(chr)) {
+        if (!predicate(codePoint, 0)) {
             return@Parser ParseResult.error<String>(input, error)
         }
 
-        val output = StringBuilder().append(chr.toChar())
+        val output = StringBuilder().appendCodePoint(codePoint)
+        var index = 1
 
-        while (!Input.isEof(peek.readUtf8CodePoint().also { chr = it })) {
-            if (!predicate(chr)) {
+        while (!Input.isEof(peek.readUtf8CodePoint().also { codePoint = it })) {
+            if (!predicate(codePoint, index++)) {
                 if (output.isEmpty()) {
                     return@Parser ParseResult.error<String>(input, error)
                 }
@@ -276,7 +294,7 @@ private fun satisfy1Internal(error: ParseError, predicate: (Utf8CodePoint) -> Bo
                 input.skip(result.utf8Size())
                 return@Parser ParseResult.ok(input, result)
             }
-            output.append(chr.toChar())
+            output.appendCodePoint(codePoint)
         }
 
         if (output.isEmpty()) {
