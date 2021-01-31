@@ -6,6 +6,10 @@ import okio.ByteString
 import okio.ByteString.Companion.EMPTY
 import okio.ByteString.Companion.encodeUtf8
 import okio.EOFException
+import okio.Source
+import okio.buffer
+import okio.source
+import java.io.InputStream
 
 /**
  * A sequential source of symbols/elements that can be parsed.
@@ -77,6 +81,11 @@ class Input private constructor(
         }
 
         @JvmStatic
+        fun of(source: Source): Input {
+            return of(source.buffer())
+        }
+
+        @JvmStatic
         fun of(byteString: ByteString): Input {
             return of(
                 Buffer().let {
@@ -99,6 +108,11 @@ class Input private constructor(
                     it
                 }
             )
+        }
+
+        @JvmStatic
+        fun of(inputStream: InputStream): Input {
+            return of(inputStream.source())
         }
     }
 }
