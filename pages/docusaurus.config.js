@@ -13,7 +13,7 @@ module.exports = {
   tagline: 'Kotlin/JVM parser combinator library',
   url: `https://yegair.io/${projectName}`,
   baseUrl: `/${projectName}/`,
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName,
