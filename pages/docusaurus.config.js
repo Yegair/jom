@@ -92,6 +92,13 @@ module.exports = {
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Hauke Jäger. Built with Docusaurus.`,
     },
+    prism: {
+      theme: require('prism-react-renderer/themes/github'),
+      additionalLanguages: [
+        'java',
+        'kotlin',
+      ],
+    },
   },
   presets: [
     [
