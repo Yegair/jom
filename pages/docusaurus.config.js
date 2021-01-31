@@ -18,6 +18,9 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName,
   projectName,
+  customFields: {
+    projectVersion: process.env['PROJECT_VERSION'] || 'current'
+  },
   themeConfig: {
     navbar: {
       title: projectName,

@@ -3,11 +3,13 @@ id: installation
 title: Installation
 slug: ./
 ---
-import {projectVersion} from '../../vars';
+
+import {ProjectVersion} from "../../src/components/ProjectVersion";
 
 <p>
-    <em>jom</em> is distributed as a Maven package via the <a href="https://search.maven.org/artifact/io.yegair.jom/jom" target="_blank">central repository</a>.
-    The most recent version is <code>{projectVersion}</code>.
+    <em>jom</em> is distributed as a Maven package via the
+    {' '}<a href="https://search.maven.org/artifact/io.yegair.jom/jom" target="_blank">central repository</a>.
+    The most recent version is <ProjectVersion/>.
 </p>
 
 ## Gradle
