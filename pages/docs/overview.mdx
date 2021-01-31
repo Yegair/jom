@@ -6,7 +6,119 @@ slug: ./
 
 _jom_ is a parser combinator library inspired by the great Rust library [nom](https://github.com/Geal/nom).
 
+## Motivation
+
+When I learn new programming languages I always need to do so in the scope of some little project,
+so I can get a glimpse of what it would be like to use the language for building software at work.
+A year ago I was trying out [Rust](https://www.rust-lang.org/) and I decided to write a parser for a custom language,
+that I had wanted to implement for a while but never got to it.
+
+Coming from the Java/JVM world I started to look for parser generators like [antlr](https://www.antlr.org/),
+because I liked the idea of just putting a grammar in and getting a fully working parser out.
+After trying out several parser generators for Rust, including antlr but also others,
+I was really disappointed by the developer experience.
+I already admired Rust (and Cargo) for its exceptionally pleasing developer experience,
+but those parser generator frameworks introduced a complexity that just felt wrong.
+So I thought there must be a way of writing a parser without sacrificing the great developer experience,
+that is provided by Rust, and I was right.
+As soon as I started to no longer look explicitly for parser generators,
+I immediately found [nom](https://github.com/Geal/nom),
+a parser combinator framework for Rust.
+This was a game changer.
+
+nom provides you with a set of low level parsers, and some higher order combinators,
+all of which are just simple Rust functions.
+You can build almost any complex parser that you need by just combining the existing parsers.
+
+When I came back from Rust to my good ol’ JVM (Java, Kotlin, …),
+I really missed such a simple yet powerful library for writing parsers.
+
+For example, I write regular expressions for validating/recognizing some string input on a regular basis,
+and I always have to write 10-20 lines of comment just to explain to my coworkers how the regex is intended to work.
+
+> At least I think one should always extensively document regular expressions,
+> because communicating intent to other developers through regex implementations is not that easy.
+
+With a parser combinator like nom I could do the same thing,
+but the code which does the parsing/recognition would be maintainable and comprehensible.
+
+I had a look at two seemingly promising parser combinator libraries,
+namely [jparsec](https://github.com/jparsec/jparsec)
+and [funcj.parser](https://github.com/typemeta/funcj/tree/master/parser),
+but at least in my opinion they both have way to bloated and unintuitive APIs.
+
+So I decided to just port nom to the JVM and call the result jom.
+
 ## When to use jom
 
-_jom_ was implemented in order to rapidly prototype parsers for custom (programming) languages.
+_jom_ was implemented in order to quickly prototype parsers for custom languages.
+It is not (yet) recommended to use _jom_ in production, because of its young age.
+This recommendation will change in the future, when _jom_ has matured.
+However, for very small use cases such as replacing a regular expression with a _jom_ parser,
+it can be used without problems.
 
+## What does a jom parser look like?
+
+As an example for a simple parser, lets suppose we have some _camelCase_ formatted text,
+for example `"fooBarBaz"`
+We want to parse this text and extract the segments `["foo", "Bar", "Baz"]` as a list.
+
+```kotlin
+import io.yegair.jom.Combinators.many0
+import io.yegair.jom.Combinators.map
+import io.yegair.jom.Combinators.pair
+import io.yegair.jom.Input
+import io.yegair.jom.Parsers.satisfy1
+import io.yegair.jom.Utf8CodePoints.isLowerCase
+import io.yegair.jom.Utf8CodePoints.isUpperCase
+import kotlin.system.exitProcess
+
+val camelCase =
+  // map applies a single parser and then maps its output
+  // by applying a custom function
+  map(
+    // pair applies two parsers in sequence and returns
+    // their result as a Kotlin Pair
+    pair(
+      // satisfy1 reads one or more UTF-8 code points that match
+      // a given predicate and returns a string containing all
+      // matched code points
+      satisfy1 { cp, _ -> cp.isLowerCase() },
+      // many0 applies a parser zero or more times until it no longer matches
+      // it then returns a list containing all results in order
+      many0(
+        // the second parameter given to satisfy1 is the index
+        // of the codepoint within the current parser invocation
+        satisfy1 { cp, index ->
+          when (index) {
+            0 -> cp.isUpperCase()
+            else -> cp.isLowerCase()
+          }
+        }
+      )
+    )
+  ) { (first, rest) ->
+    // first is the result of the first satisfy1 parser
+    // rest is the result of the many0 parser
+    listOf(first) + rest
+  }
+
+fun main() {
+  // Input can be created from various sources,
+  // for example Input.of(System.`in`) or Input.of(byteArrayOf(...))
+  val input = Input.of("fooBarBaz")
+  val result = camelCaseParser.parse(input)
+
+  when {
+    // result.ok indicates whether the parser was able to recognize the given input.
+    // If result.ok is true, result.output holds the produced value.
+    // Given the input "fooBarBaz", this will print ["foo", "Bar", "Baz"]
+    result.ok -> print(result.output)
+    else -> exitProcess(1)
+  }
+}
+```
+
+The `camelCase` parser already uses all features that _jom_ provides.
+From here on the only thing that is to be explored are the numerous existing parsers and combinators,
+that are contained in the _jom_ library.
