@@ -33,3 +33,21 @@ dependencies {
   <version>${jom.version}</version>
 </dependency>
 ```
+
+## Transitive Dependencies
+
+jom depends on and makes heavy use of [Okio](https://square.github.io/okio/) for consuming input.
+Okio itself is written in Kotlin and depends on the Kotlin standard library.
+Thus jom has exactly two runtime dependencies: Okio and the Kotlin standard library.
+
+### Why Okio instead of Java InputStream and Reader?
+
+jom is intended to parse text as well as binary data equally well.
+Okio treats both type of input the same (`Source`),
+whereas Java treats them differently (`InputStream` and `Reader`).
+Without Okio jom wouldn't easily be able to provide a single API for parsing both types of data.
+
+However, I am aware that libraries with transitive dependencies may have some drawbacks,
+regarding version conflicts and final application size.
+The decision for using Okio has been made because the benefits of using it by far outweigh the drawbacks of a
+transitive dependency.
