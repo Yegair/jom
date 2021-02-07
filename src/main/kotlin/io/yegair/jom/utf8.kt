@@ -64,6 +64,12 @@ object Utf8CodePoints {
     }
 
     /**
+     * Converts a UTF-8 codepoint to a UTF-8 encoded string.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.utf8(): String = String(Character.toChars(this))
+
+    /**
      * Tests whether a given code point is an alphabetic character `[a-z]`, `[A-Z]`.
      */
     @JvmStatic
