@@ -4,6 +4,7 @@ package io.yegair.jom
 
 import io.yegair.jom.Parsers.satisfy1
 import io.yegair.jom.Utf8CodePoints.isLowerCase
+import io.yegair.jom.Utf8CodePoints.isSpace
 import io.yegair.jom.Utf8CodePoints.isUpperCase
 import io.yegair.jom.test.ParseResultAssert.Companion.assertThatParseResult
 import org.junit.jupiter.api.Test

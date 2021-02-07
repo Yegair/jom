@@ -1,5 +1,13 @@
 package io.yegair.jom
 
+import io.yegair.jom.Utf8CodePoints.isAlpha
+import io.yegair.jom.Utf8CodePoints.isAlphaNumeric
+import io.yegair.jom.Utf8CodePoints.isChar
+import io.yegair.jom.Utf8CodePoints.isDigit
+import io.yegair.jom.Utf8CodePoints.isHexDigit
+import io.yegair.jom.Utf8CodePoints.isMultiSpace
+import io.yegair.jom.Utf8CodePoints.isOctDigit
+import io.yegair.jom.Utf8CodePoints.isSpace
 import io.yegair.jom.Utf8CodePoints.toUtf8CodePoint
 import io.yegair.jom.Utf8CodePoints.toUtf8CodePoints
 import okio.ByteString

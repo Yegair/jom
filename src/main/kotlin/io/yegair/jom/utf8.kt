@@ -6,26 +6,6 @@ import java.nio.charset.StandardCharsets
 
 typealias Utf8CodePoint = Int
 
-internal fun Utf8CodePoint.isAlpha(): Boolean = toChar().isAlpha()
-
-internal fun Utf8CodePoint.isAlphaNumeric(): Boolean = toChar().isAlphaNumeric()
-
-internal fun Utf8CodePoint.isDigit(): Boolean = toChar().isDigit()
-
-internal fun Utf8CodePoint.isHexDigit(): Boolean = toChar().isHexDigit()
-
-internal fun Utf8CodePoint.isOctDigit(): Boolean = toChar().isOctDigit()
-
-internal fun Utf8CodePoint.isMultiSpace(): Boolean = toChar().isMultiSpace()
-
-internal fun Utf8CodePoint.isSpace(): Boolean = toChar().isSpace()
-
-internal fun Utf8CodePoint.isChar(chr: Char): Boolean = toChar() == chr
-
-internal fun Utf8CodePoint.utf8(): String {
-    return String(Character.toChars(this))
-}
-
 object Utf8CodePoints {
 
     /**
@@ -82,6 +62,54 @@ object Utf8CodePoints {
             else -> 1
         }
     }
+
+    /**
+     * Tests whether a given code point is an alphabetic character `[a-z]`, `[A-Z]`.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isAlpha(): Boolean = toChar().isAlpha()
+
+    /**
+     * Tests whether a given code point is an alphabetic character `[a-z]`, `[A-Z]` or a decimal digit [0-9]`.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isAlphaNumeric(): Boolean = toChar().isAlphaNumeric()
+
+    /**
+     * Tests whether a given code point is a decimal digit `[0-9]`.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isDigit(): Boolean = toChar().isDigit()
+
+    /**
+     * Tests whether a given code point is a hex digit `[0-9]`, `[a-f]`, `[A-F]`.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isHexDigit(): Boolean = toChar().isHexDigit()
+
+    /**
+     * Tests whether a given code point is an octal digit `[0-7]`.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isOctDigit(): Boolean = toChar().isOctDigit()
+
+    /**
+     * Tests whether a given code point is a white space, tab, or line ending.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isMultiSpace(): Boolean = toChar().isMultiSpace()
+
+    /**
+     * Tests whether a given code point is a white space or tab.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isSpace(): Boolean = toChar().isSpace()
+
+    /**
+     * Tests whether a given code point equals a given character.
+     */
+    @JvmStatic
+    fun Utf8CodePoint.isChar(chr: Char): Boolean = this == chr.toUtf8CodePoint()
 
     /**
      * Tests whether a given code point is a lower case letter.
