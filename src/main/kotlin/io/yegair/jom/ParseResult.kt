@@ -121,7 +121,8 @@ private class ParseSuccess<O>(
     override val output: O
 ) : ParseResult<O>(ok = true, remaining = remaining) {
 
-    override val error: ParseError? = null
+    override val error: Nothing
+        get() = throw IllegalStateException("can not obtain error from a successful parse result")
 
     override fun <R> map(
         ok: (Input, O) -> ParseResult<R>,
@@ -140,7 +141,7 @@ private class ParseFailure<O>(
     override val error: ParseError
 ) : ParseResult<O>(ok = false, remaining = remaining) {
 
-    override val output: O
+    override val output: Nothing
         get() = throw IllegalStateException("can not obtain output from an erroneous parse result")
 
     override fun <R> map(
