@@ -5,7 +5,8 @@ module.exports = {
       label: 'Getting Started',
       items: [
           'overview',
-          'getting-started/installation'
+          'getting-started/installation',
+          'getting-started/parsers'
       ]
     },
   ]

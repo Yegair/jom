@@ -1,0 +1,292 @@
+---
+id: parsers
+title: Parser Basics
+---
+
+A [`Parser`](/jom/api/jom/io.yegair.jom/-parser) is the basic building block of _jom_.
+It essentially is a function which consumes [`Input`](/jom/api/jom/io.yegair.jom/-input),
+and returns a [`ParseResult`](/jom/api/jom/io.yegair.jom/-parse-result).
+A `ParseResult` can be in one of two states, `ok` or `not-ok` (aka. `error`).
+`ok` indicates that the parser was able to recognize the input and produced some
+[`output`](/jom/api/jom/io.yegair.jom/-parse-result/output.html).
+`not-ok` indicates that the parser was unable to recognize the input and produced a
+[`ParseError`](/jom/api/jom/io.yegair.jom/-parse-error) instead.
+A `ParseResult` also contains the [`remaining`](/jom/api/jom/io.yegair.jom/-parse-result/remaining.html) input,
+which is the input that has not be consumed by the parser.
+
+For example lets have a look at one of the most basic parsers
+[`alpha1`](/jom/api/jom/io.yegair.jom/-parsers/alpha1.html).
+It parses one or more alphabetical characters,
+and is defined as `Parser<String>` which means that it will produce a `String` as its output.
+
+```kotlin
+val parser = Parsers.alpha1()
+
+println(parser.parse("abc")) // prints Ok[abc]
+println(parser.parse("ab1")) // prints Ok[ab]
+println(parser.parse("123")) // prints Error[Alpha]
+```
+
+All predefined parsers are defined in [`Parsers`](/jom/api/jom/io.yegair.jom/-parsers).
+Have a look at the API docs to get an overview.
+
+## Combinators
+
+A `Combinator` is a higher-order `Parser`.
+It _combines_ other, so called _embedded_ parsers, into a new parser.
+Since combinators are themselves parsers, they can also be embedded into other combinators.
+This way the existing basic [`Parsers`](/jom/api/jom/io.yegair.jom/-parsers)
+and [`Combinators`](/jom/api/jom/io.yegair.jom/-combinators) can be combined in any thinkable way,
+in order to create exactly the parser one needs.
+
+As an example lets have a look at [`alt`](/jom/api/jom/io.yegair.jom/-combinators/alt.html),
+which is one of the most common and most powerful combinators.
+It takes multiple embedded parsers and applies them in order until one of the parsers recognizes the input.
+
+```kotlin
+val parser = Combinators.alt(
+  Parsers.alpha1(),
+  Parsers.digit1()
+)
+
+println(parser.parse("abc")) // prints Ok[abc]
+println(parser.parse("ab1")) // prints Ok[ab]
+println(parser.parse("123")) // prints Ok[123]
+println(parser.parse("12a")) // prints Ok[12]
+println(parser.parse("!12a")) // prints Error[Digit]
+```
+
+This works because [`alpha1`](/jom/api/jom/io.yegair.jom/-parsers/alpha1.html)
+and [`digit1`](/jom/api/jom/io.yegair.jom/-parsers/digit1.html) both produce `String` outputs.
+So the resulting parser is also of type `Parser<String>`.
+But what if we wanted to also parse the character `'!'`?
+
+A first attempt might look like this:
+
+:::danger Compile Error
+```kotlin
+val parser = Combinators.alt(
+  Parsers.alpha1(),
+  Parsers.digit1(),
+  Parsers.codePoint('!')
+)
+```
+:::
+
+This won't compile,
+because [`codePoint`](/jom/api/jom/io.yegair.jom/-parsers/code-point.html) returns a Parser of type `Parser<Utf8CodePoint>`.
+However, we can use another combinator [`map`](/jom/api/jom/io.yegair.jom/-combinators/map.html) to make this work.
+
+```kotlin
+val parser = Combinators.alt(
+  Parsers.alpha1(),
+  Parsers.digit1(),
+  Combinators.map(Parsers.codePoint('!')) { it.utf8() }
+)
+
+println(parser.parse("abc")) // prints Ok[abc]
+println(parser.parse("ab1")) // prints Ok[ab]
+println(parser.parse("123")) // prints Ok[123]
+println(parser.parse("12a")) // prints Ok[12]
+println(parser.parse("!1a")) // prints Ok[!]
+```
+
+All predefined combinators are defined in [`Combinators`](/jom/api/jom/io.yegair.jom/-combinators).
+Have a look at the API docs to get an overview.
+
+## Input
+
+[`Input`](/jom/api/jom/io.yegair.jom/-input) is a simple abstraction over a stream of bytes.
+It is the only parameter that is passed to a parser,
+so it's interface determines the overall capability of _jom_ parsers.
+
+> Up to now we have only seen parsers being invoked with `String` parameters,
+> so how can `Input` be the only parameter for a `Parser` you might ask?
+> Actually an expression of the form
+> ```kotlin
+> parser.parse("foobar")
+> ```
+> is just shorthand for
+> ```kotlin
+> parser.parse(Input.of("foobar"))
+> ```
+
+`Input` instances can be created from various sources such as
+`String`,
+`ByteArray` (Java `byte[]`),
+`java.io.InputStream`,
+[`okio.Source`](https://square.github.io/okio/2.x/okio/okio/-source),
+and [`okio.ByteString`](https://square.github.io/okio/2.x/okio/okio/-byte-string).
+No matter the source, creating an `Input` always works the same,
+as an example let's parse the contents of a file using the classic Java Files API.
+
+```kotlin
+Files.newInputStream(Paths.get("/path/to/my/file")).use { inputStream ->
+  val input = Input.of(inputStream)
+  val result = myParser.parse(input)
+
+  when {
+    result.ok -> result.output
+    else -> throw RuntimeException("could not parse $pathToMyFile")
+  }
+}
+```
+
+There is also an alternative way using [Okio](https://square.github.io/okio/).
+
+```kotlin
+Paths.get("/path/to/my/file").source().use { source ->
+  val input = Input.of(source)
+  val result = myParser.parse(input)
+
+  when {
+    result.ok -> result.output
+    else -> throw RuntimeException("could not parse $pathToMyFile")
+  }
+}
+```
+
+Under the hood `Input` makes heavy use of [`okio.BufferedSource`](https://square.github.io/okio/2.x/okio/okio/-buffered-source),
+so internally the `java.io.InputStream` would be wrapped by Okio anyway.
+Hence, there is no real difference between the two approaches in terms of efficiency.
+
+The most important point of these examples is, that `Input` instances do not manage their underlying source.
+Thus, the caller must care about closing the `InputStream` or `Source` once the parser is done.
+Also, the `ParseResult` of a parser holds a reference to the `Input`,
+so the result also becomes "invalid" when the underlying `InputStream` or `Source` is closed.
+In this case for example the `ParseResult` itself should not be returned from the `use` block.
+However, the `output` of a `ParseResult` can safely be returned.
+
+## ParseResult
+
+[`ParseResult`](/jom/api/jom/io.yegair.jom/-parse-result) is a simple wrapper for the result of a parser.
+It's [`ok`](/jom/api/jom/io.yegair.jom/-parse-result/ok.html) property indicates whether a parser was
+successful or has failed recognizing the input.
+If `ok` is `true` the parser was successful, and the result of the parser can be obtained via the
+[`output`](/jom/api/jom/io.yegair.jom/-parse-result/output.html) property.
+Otherwise, the parser failed and trying to access the `output` property results in an `IllegalStateException` being
+thrown.
+If the parser failed the [`error`](/jom/api/jom/io.yegair.jom/-parse-result/error.html) property holds the
+parse error which describes the cause of the failure.
+Accessing the `error` property on a successful parse result also causes an `IllegalStateException` being thrown.
+
+:::note
+The error reporting capabilities of _jom_ are currently extremely limited.
+Better error reporting will be implemented in a future version.
+:::
+
+`ParseResult` also provides some monadic methods for working with `output` and `error`,
+without having to check whether `ok` is `true` or `false`.
+For example, it is possible to [`map`](/jom/api/jom/io.yegair.jom/-parse-result/map.html) the output value of
+successful parse results:
+
+```kotlin
+val result = myIntParser
+  .parse(input.peek())
+  // this mapping will be called when the parser succeeds
+  .map { remaining, output ->
+    when (output) {
+      // we can use map to change the result type (in this case to Boolean)
+      42 -> ParseResult.ok(remaining, true)
+      // we can also transform a successful parse result into an error
+      13 -> ParseResult.error(input, ParseError.Digit)
+      else -> ParseResult.ok(remaining, false)
+    }
+  }
+```
+
+It is also possible to map the error, however in that case we need to map successful outputs as well as errors,
+in order to keep our type-safety.
+
+```kotlin
+val result = myIntParser
+  .parse(input.peek())
+  .map(
+    // this mapping will be called when the parser succeeds
+    ok = { remaining, output ->
+      when (output) {
+        13 -> ParseResult.error(input, ParseError.Digit)
+        else -> ParseResult.ok(remaining, output)
+      }
+    },
+    // this mapping will be called when the parser fails
+    error = { remaining, err ->
+      when (err) {
+          // we can transform a failed parse result into a success
+          ParseError.Eof -> ParseResult.ok(remaining, -1)
+          // we can also alter the error itself
+          else -> ParseResult.error(remaining, ParseError.Digit)
+      }
+    }
+  )
+```
+
+
+## Custom Parsers
+
+Sometimes the predefined [`Parsers`](/jom/api/jom/io.yegair.jom/-parsers)
+and [`Combinators`](/jom/api/jom/io.yegair.jom/-combinators)
+might not be enough to implement exactly the parser one needs.
+In such hopefully rare cases it is possible to implement custom parsers from scratch.
+For example lets assume we want write a custom parser which parses exactly one alphabetical letter.
+
+```kotlin
+val customParser = Parser { input ->
+
+  // we don't know whether the next codepoint is alphabetical,
+  // so we have to peek instead of just consuming it
+  val remaining = input.peek()
+
+  // consume the next UTF-8 codepoint from the peeking input
+  // this will leave the original input unchanged
+  val codePoint = remaining.readUtf8CodePoint()
+
+  when {
+    // check whether the parsed code point is the special EOF code point
+    // which indicates that the end of the given input has been reached
+    Input.isEof(codePoint) -> ParseResult.error(input, ParseError.Eof)
+    // if the codepoint is alphabetical
+    // return it together with the remaining input
+    codePoint.isAlpha() -> ParseResult.ok(remaining, codePoint)
+    // otherwise return the original input and an appropriate error
+    else -> ParseResult.error(input, ParseError.CodePoint)
+  }
+}
+```
+
+Of course, it is also possible to implement a parser in a more classical way:
+
+```kotlin
+class CustomParser : Parser<Utf8CodePoint> {
+  override fun parse(input: Input): ParseResult<Utf8CodePoint> {
+    // the implementation is the same as above...
+  }
+}
+```
+
+Using `class` or `object` instead of `val` can help when there are multiple parsers,
+that are circular dependent on each other,
+since that is not possible with simple variables.
+In such cases there is also the possibility to implement parsers as simple methods,
+if `class` or `object` per parser seems to verbose:
+
+```kotlin
+object MyParsers {
+
+  fun customParser1(input: Input): ParseResult<Utf8CodePoint> {
+    // the implementation is also the same as above...
+  }
+
+  fun customParser2(input: Input): ParseResult<Utf8CodePoint> {
+    // another implementation
+  }
+
+  fun customCombinator(input: Input): ParseResult<Utf8CodePoint> {
+    return Combinators.alt(
+      ::customParser1,
+      ::customParser2
+    ).parse(input)
+  }
+}
+```
+
